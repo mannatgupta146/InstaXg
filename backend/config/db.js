@@ -1,6 +1,4 @@
 const mongoose = require('mongoose')
-require('dotenv').config()
-
 const connectToDb = async()=>{
     await mongoose.connect(`${process.env.MONGODB_URI}/instaxg`)
     .then(()=> {
