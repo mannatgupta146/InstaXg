@@ -19,10 +19,6 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    followers: {
-        type: String,
-        required: true
-    },
     profilePic: {
         type: String,
         default: 'https://ik.imagekit.io/mannatgupta146/56af7ed2c15a58fed21e8ffd0744bb1e.jpg'
