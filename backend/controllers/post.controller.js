@@ -4,7 +4,7 @@ const bycrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
 const imagekit = new ImageKit({
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY, // This is the default and can be omitted
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
 });
 
 const createPostContoller = async(req, res) =>{
