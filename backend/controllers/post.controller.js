@@ -1,6 +1,5 @@
 const postModel = require('../models/post.model')
 const ImageKit = require('@imagekit/nodejs')
-const bycrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
 const imagekit = new ImageKit({
@@ -8,15 +7,42 @@ const imagekit = new ImageKit({
 });
 
 const createPostContoller = async(req, res) =>{
-    console.log(req.body, req.file)
+
+    const token = req.cookies.jwt_token
+
+    if(!token){
+        return res.status(401).json({
+            message: "Unauthoriezd access"
+        })
+    }
+
+    let decoded = null
+
+    try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+    } catch (error) {
+        return res.status(401).json({
+            message: "User not authoriezd"
+        })
+    }
 
     const file = await imagekit.files.upload({
         file: await ImageKit.toFile(Buffer.from(req.file.buffer), 'file'),
         fileName: "Test",
-        folder: "instaxg"
+        folder: "instaxg/images"
     })
 
-    res.send(file)
+    const post = await postModel.create({
+        caption: req.body.caption,
+        user: decoded.id,
+        imgUrl: file.url
+    })
+
+    res.status(201).json({
+        message: "post created successfully",
+        post
+    })
 }
 
 module.exports = {
