@@ -46,6 +46,7 @@ const createPostContoller = async(req, res) =>{
 }
 
 const getPostContoller = async(req, res) =>{
+
     const token = req.cookies.token
 
         if(!token){
@@ -69,13 +70,66 @@ const getPostContoller = async(req, res) =>{
 
     const posts = await postModel.findById({user: userId})
 
+    if(!posts){
+        return res.status(404).json({
+            message: "Posts not found"
+        })
+    }
+
     res.status(200).json({
         message: "posts fetched successfully",
         posts
     })
 }
 
+const getPostDetailsContoller = async(req, res) => {
+
+    const token = req.cookies.token
+
+        if(!token){
+        return res.status(401).json({
+            message: "Unauthoriezd access"
+        })
+    }
+
+    let decoded
+
+    try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+    } catch (error) {
+        return res.status(401).json({
+            message: "User not authoriezd"
+        })
+    }
+
+    const userId = decoded.id
+    const postId = req.params.postId
+
+    const post = await postModel.findById(postId)
+
+    if(!post){
+        return res.status(404).json({
+            message: "Post not found"
+        })
+    }
+
+    const isValidUser = post.user == userId
+
+    if(!isValidUser){
+        return res.status(403).json({
+            message: "forbidden content"
+        })
+    }
+
+    res.status(200).json({
+        message: "post details fetched",
+        post
+    })
+}
+
 module.exports = {
     createPostContoller,
-    getPostContoller
+    getPostContoller,
+    getPostDetailsContoller
 }

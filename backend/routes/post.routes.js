@@ -8,5 +8,6 @@ const postRouter = express.Router()
 
 postRouter.post('/', upload.single('image'), postContoller.createPostContoller)
 postRouter.get('/', postContoller.getPostContoller)
+postRouter.get('/details/:postId', postContoller.getPostDetailsContoller)
 
 module.exports = postRouter
