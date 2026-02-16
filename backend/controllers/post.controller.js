@@ -68,7 +68,7 @@ const getPostContoller = async(req, res) =>{
 
     const userId = decoded.id
 
-    const posts = await postModel.findById({user: userId})
+    const posts = await postModel.find({user: userId})
 
     if(!posts){
         return res.status(404).json({
@@ -88,7 +88,7 @@ const getPostDetailsContoller = async(req, res) => {
 
         if(!token){
         return res.status(401).json({
-            message: "Unauthoriezd access"
+            message: "Unauthorized access"
         })
     }
 
@@ -99,7 +99,7 @@ const getPostDetailsContoller = async(req, res) => {
 
     } catch (error) {
         return res.status(401).json({
-            message: "User not authoriezd"
+            message: "User not authorized"
         })
     }
 
@@ -114,7 +114,7 @@ const getPostDetailsContoller = async(req, res) => {
         })
     }
 
-    const isValidUser = post.user == userId
+    const isValidUser = post.user.toString() == userId
 
     if(!isValidUser){
         return res.status(403).json({
