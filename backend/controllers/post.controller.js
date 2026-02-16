@@ -6,7 +6,7 @@ const imagekit = new ImageKit({
   privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
 });
 
-const createPostContoller = async(req, res) =>{
+const createPostController = async(req, res) =>{
 
     const token = req.cookies.token
 
@@ -45,7 +45,7 @@ const createPostContoller = async(req, res) =>{
     })
 }
 
-const getPostContoller = async(req, res) =>{
+const getPostController = async(req, res) =>{
 
     const token = req.cookies.token
 
@@ -82,7 +82,7 @@ const getPostContoller = async(req, res) =>{
     })
 }
 
-const getPostDetailsContoller = async(req, res) => {
+const getPostDetailsController = async(req, res) => {
 
     const token = req.cookies.token
 
@@ -129,7 +129,7 @@ const getPostDetailsContoller = async(req, res) => {
 }
 
 module.exports = {
-    createPostContoller,
-    getPostContoller,
-    getPostDetailsContoller
+    createPostController,
+    getPostController,
+    getPostDetailsController
 }
