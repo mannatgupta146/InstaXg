@@ -8,7 +8,7 @@ const imagekit = new ImageKit({
 
 const createPostContoller = async(req, res) =>{
 
-    const token = req.cookies.jwt_token
+    const token = req.cookies.token
 
     if(!token){
         return res.status(401).json({
@@ -16,7 +16,7 @@ const createPostContoller = async(req, res) =>{
         })
     }
 
-    let decoded = null
+    let decoded
 
     try {
         decoded = jwt.verify(token, process.env.JWT_SECRET)
@@ -45,6 +45,37 @@ const createPostContoller = async(req, res) =>{
     })
 }
 
+const getPostContoller = async(req, res) =>{
+    const token = req.cookies.token
+
+        if(!token){
+        return res.status(401).json({
+            message: "Unauthoriezd access"
+        })
+    }
+
+    let decoded
+
+    try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+    } catch (error) {
+        return res.status(401).json({
+            message: "User not authoriezd"
+        })
+    }
+
+    const userId = decoded.id
+
+    const posts = await postModel.findById({user: userId})
+
+    res.status(200).json({
+        message: "posts fetched successfully",
+        posts
+    })
+}
+
 module.exports = {
-    createPostContoller
+    createPostContoller,
+    getPostContoller
 }
