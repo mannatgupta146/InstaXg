@@ -2,6 +2,7 @@ import React from "react"
 import { useState } from "react"
 import "../style/form.scss"
 import { Link } from "react-router-dom"
+import axios from 'axios'
 
 const Login = () => {
   const [username, setUsername] = useState("")
@@ -9,6 +10,20 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
+    axios
+      .post(
+        "http://localhost:3000/api/auth/login",
+        {
+          username,
+          password,
+        },
+        { withCredentials: true },
+      )
+
+      .then((res) => {
+        console.log(res.data)
+      })
   }
 
   return (
@@ -36,7 +51,12 @@ const Login = () => {
 
         <button>Login</button>
 
-        <p>Don't have an account? <Link className="toggleAuth" to='/register'>Register</Link></p>
+        <p>
+          Don't have an account?{" "}
+          <Link className="toggleAuth" to="/register">
+            Register
+          </Link>
+        </p>
       </form>
     </main>
   )
