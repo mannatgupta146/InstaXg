@@ -5,9 +5,9 @@ const userController = require("../controllers/user.controller")
 const userRouter = express.Router()
 
 /**
- * @route POST api/users/follow/:username
- * @description Follow a user
- * @access Private
+ * @route   POST /api/users/follow/:username
+ * @desc    Follow a user
+ * @access  Private (Authenticated users only)
  */
 userRouter.post(
   "/follow/:username",
@@ -16,9 +16,9 @@ userRouter.post(
 )
 
 /**
- * @route POST api/users/unfollow/:username
- * @description Unfollow a user
- * @access Private
+ * @route   POST /api/users/unfollow/:username
+ * @desc    Unfollow a user
+ * @access  Private (Authenticated users only)
  */
 userRouter.post(
   "/unfollow/:username",

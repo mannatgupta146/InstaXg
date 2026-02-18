@@ -7,13 +7,30 @@ const upload = multer({ storage: multer.memoryStorage() })
 
 const postRouter = express.Router()
 
+/**
+ * @route   POST /api/posts
+ * @desc    Create a new post (with image upload)
+ * @access  Private (Authenticated users only)
+ */
 postRouter.post(
   "/",
   upload.single("image"),
   identifyUser,
   postContoller.createPostController,
 )
+
+/**
+ * @route   GET /api/posts
+ * @desc    Get all posts (feed)
+ * @access  Private (Authenticated users only)
+ */
 postRouter.get("/", identifyUser, postContoller.getPostController)
+
+/**
+ * @route   GET /api/posts/details/:postId
+ * @desc    Get details of a specific post
+ * @access  Private (Authenticated users only)
+ */
 postRouter.get(
   "/details/:postId",
   identifyUser,
