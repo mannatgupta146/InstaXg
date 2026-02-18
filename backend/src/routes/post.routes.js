@@ -37,4 +37,11 @@ postRouter.get(
   postContoller.getPostDetailsController,
 )
 
+/**
+ * @route   POST /api/posts/like/:postId
+ * @desc    Like or unlike a post
+ * @access  Private (Authenticated users only)
+ */
+postRouter.post("/like/:postId", identifyUser, postContoller.postLikeController)
+
 module.exports = postRouter
