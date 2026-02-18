@@ -73,6 +73,29 @@ button:active {
   transform: translateY(0);
 }
 
+/* paragraph below button */
+p {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+/* register link */
+.toggleAuth {
+  color: #667eea;
+  font-weight: 600;
+  margin-left: 0.25rem;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.toggleAuth:hover {
+  color: #5a67d8;
+  text-decoration: underline;
+}
+
+
 /* animation */
 @keyframes fadeIn {
   from {
