@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const connectToDb = async()=>{
-    await mongoose.connect(`${process.env.MONGODB_URI}/instaxg`)
+    await mongoose.connect(`${process.env.MONGODB_URI}`)
     .then(()=> {
         console.log('database connected');
     })
