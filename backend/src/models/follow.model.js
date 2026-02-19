@@ -12,8 +12,8 @@ const followSchema = mongoose.Schema(
       type: String,
       default: "pending",
       enum: {
-        values: ["active", "pending", "rejected"],
-        message: "status can be only active, pending or rejected",
+        values: ["accepted", "pending", "rejected"],
+        message: "status can be only accepted, pending or rejected",
       },
     },
   },
