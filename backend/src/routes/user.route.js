@@ -38,25 +38,15 @@ userRouter.get(
 )
 
 /**
- * @route   POST /api/users/follow/accept/:requestId
- * @desc    Accept a follow request
+ * @route   PATCH /api/users/follow/request/:requestId
+ * @desc    Accept or reject follow request by sending res
  * @access  Private
  */
-userRouter.post(
-  "/follow/accept/:requestId",
+userRouter.patch(
+  "/follow/request/:requestId",
   identifyUser,
-  userController.acceptFollowRequestController,
+  userController.updateFollowRequestController,
 )
 
-/**
- * @route   POST /api/users/follow/reject/:requestId
- * @desc    Reject a follow request
- * @access  Private
- */
-userRouter.post(
-  "/follow/reject/:requestId",
-  identifyUser,
-  userController.rejectFollowRequestController,
-)
 
 module.exports = userRouter

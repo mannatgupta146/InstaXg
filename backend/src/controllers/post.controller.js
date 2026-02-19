@@ -1,3 +1,4 @@
+const followModel = require("../models/follow.model")
 const postModel = require("../models/post.model")
 const ImageKit = require("@imagekit/nodejs")
 
@@ -14,6 +15,7 @@ const createPostController = async (req, res) => {
 
   const post = await postModel.create({
     caption: req.body.caption,
+    username: req.user.username,
     user: req.user.id,
     imgUrl: file.url,
   })
@@ -43,7 +45,7 @@ const getPostController = async (req, res) => {
 
 const getPostDetailsController = async (req, res) => {
   const userId = req.user.id
-
+  const username = req.user.username
   const postId = req.params.postId
 
   const post = await postModel.findById(postId)
@@ -54,11 +56,24 @@ const getPostDetailsController = async (req, res) => {
     })
   }
 
-  const isValidUser = post.user.toString() == userId
+  // owner check
+  if (post.user.toString() === userId) {
+    return res.status(200).json({
+      message: "post details fetched",
+      post,
+    })
+  }
 
-  if (!isValidUser) {
+  // check if follower is accepted
+  const followRelation = await followModel.findOne({
+    follower: username,
+    followee: post.username, // or owner's username
+    status: "accepted"
+  })
+
+  if (!followRelation) {
     return res.status(403).json({
-      message: "forbidden content",
+      message: "Follow user to view posts"
     })
   }
 
@@ -75,10 +90,26 @@ const postLikeController = async (req, res) => {
 
   const post = await postModel.findById(postId)
 
-  if(!post){
+  if (!post) {
     return res.status(404).json({
       message: "No post exists"
     })
+  }
+
+  // allow owner
+  if (post.username !== username) {
+
+    const relation = await followModel.findOne({
+      follower: username,
+      followee: post.username,
+      status: "accepted"
+    })
+
+    if (!relation) {
+      return res.status(403).json({
+        message: "Follow user to like posts"
+      })
+    }
   }
 
   const like = await likeModel.create({
@@ -91,6 +122,7 @@ const postLikeController = async (req, res) => {
     like
   })
 }
+
 
 module.exports = {
   createPostController,

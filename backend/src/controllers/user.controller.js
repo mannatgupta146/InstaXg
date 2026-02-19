@@ -126,82 +126,57 @@ const getFollowRequestsController = async(req, res) => {
 
 }
 
-const acceptFollowRequestController = async(req, res) => {
-
-    const loggedinUser = req.user.username
+const updateFollowRequestController = async (req, res) => {
+    
+    const loggedInUser = req.user.username
     const requestId = req.params.requestId
+    const { status } = req.body
+
+    // validate status
+    if (!["accepted", "rejected"].includes(status)) {
+      return res.status(400).json({
+        message: "Invalid status"
+      })
+    }
 
     const request = await followModel.findById(requestId)
 
-    if(!request){
-        return res.status(404).json({
-            message: "No request is found"
-        })
+    if (!request) {
+      return res.status(404).json({
+        message: "Request not found"
+      })
     }
 
-    // ensure request belongs to logged in user
-    if (request.followee !== loggedinUser) {
+    // security check
+    if (request.followee !== loggedInUser) {
       return res.status(403).json({
         message: "Unauthorized action"
       })
     }
 
-    // if already accepted
-    if (request.status === "accepted") {
+    // prevent duplicate update
+    if (request.status === status) {
       return res.status(400).json({
-        message: "Request already accepted"
+        message: `Request already ${status}`
       })
     }
 
     // update status
-    request.status = "accepted"
+    request.status = status
     await request.save()
 
     res.status(200).json({
-      message: `${request.follower} is now your follower`
+      message:
+        status === "accepted"
+          ? `${request.follower} is now your follower`
+          : "Follow request rejected"
     })
 }
 
-const rejectFollowRequestController = async(req, res) => {
-
-    const loggedinUser = req.user.username
-    const requestId = req.params.requestId
-
-    const request = await followModel.findById(requestId)
-
-    if(!request){
-        return res.status(404).json({
-            message: "No request is found"
-        })
-    }
-
-    // ensure request belongs to logged in user
-    if (request.followee !== loggedinUser) {
-      return res.status(403).json({
-        message: "Unauthorized action"
-      })
-    }
-
-    // if already rejected
-    if (request.status === "rejected") {
-      return res.status(400).json({
-        message: "Request already rejected"
-      })
-    }
-
-    // update status
-    request.status = "rejected"
-    await request.save()
-
-    res.status(200).json({
-      message: `Follow request rejected`
-    })
-}
 
 module.exports = {
     followUserController,
     unfollowUserController,
     getFollowRequestsController,
-    acceptFollowRequestController,
-    rejectFollowRequestController
+    updateFollowRequestController
 }
