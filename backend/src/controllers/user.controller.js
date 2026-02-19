@@ -108,7 +108,6 @@ const unfollowUserController = async (req, res) => {
   })
 }
 
-
 const getFollowRequestsController = async(req, res) => {
 
     const loggedinUser = req.user.username
@@ -126,8 +125,8 @@ const getFollowRequestsController = async(req, res) => {
 
 }
 
-const updateFollowRequestController = async (req, res) => {
-    
+const updateFollowRequestController = async(req, res) => {
+
     const loggedInUser = req.user.username
     const requestId = req.params.requestId
     const { status } = req.body
@@ -173,10 +172,40 @@ const updateFollowRequestController = async (req, res) => {
     })
 }
 
+const getFollowersController = async (req, res) => {
+    const loggedInUser = req.user.username
+
+    const followers = await followModel.find({
+      followee: loggedInUser,
+      status: "accepted"
+    }).select("follower createdAt -_id")
+
+    res.status(200).json({
+      message: "Followers fetched successfully",
+      followers
+    })
+}
+
+const getFollowingController = async (req, res) => {
+    const loggedInUser = req.user.username
+
+    const following = await followModel.find({
+      follower: loggedInUser,
+      status: "accepted"
+    }).select("followee createdAt -_id")
+
+    res.status(200).json({
+      message: "Following list fetched successfully",
+      following
+    })
+}
+
 
 module.exports = {
     followUserController,
     unfollowUserController,
     getFollowRequestsController,
-    updateFollowRequestController
+    updateFollowRequestController,
+    getFollowersController,
+    getFollowingController
 }
