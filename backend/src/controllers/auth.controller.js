@@ -1,98 +1,119 @@
-const userModel = require('../models/user.model')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+const userModel = require("../models/user.model")
+const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
 
-const registerController = async(req, res) => {
-    const {name, username, email, password, bio, profilePic} = req.body
+const registerController = async (req, res) => {
+  const { name, username, email, password, bio, profilePic } = req.body
 
-    const isUserAlreadyExists = await userModel.findOne({
-        $or: [
-            {email},
-            {username}
-        ]
+  const isUserAlreadyExists = await userModel.findOne({
+    $or: [{ email }, { username }],
+  })
+
+  if (isUserAlreadyExists) {
+    return res.status(409).json({
+      message: "user already exists",
     })
+  }
 
-    if(isUserAlreadyExists){
-        return res.status(409).json({
-            message: "user already exists"
-        })
-    }
+  const hash = await bcrypt.hash(password, 10)
 
-    const hash = await bcrypt.hash(password, 10)
+  const user = await userModel.create({
+    name,
+    username,
+    email,
+    password: hash,
+    bio,
+    profilePic,
+  })
 
-    const user = await userModel.create({name, username, email, password: hash, bio, profilePic})
+  const token = jwt.sign(
+    {
+      id: user.id,
+      username: user.username,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" },
+  )
 
-    const token = jwt.sign(
-        {
-            id: user.id,
-            username: user.username
-        },
-        process.env.JWT_SECRET,
-        {expiresIn: "1d"}
-    )
+  res.cookie("token", token)
 
-    res.cookie("token", token)
-
-    res.status(201).json({
-        message: "user registered successfully",
-        user: {
-            name: user.name, 
-            username: user.username, 
-            email: user.email, 
-            bio: user.bio, 
-            profilePic: user.profilePic
-        }
-    })
+  res.status(201).json({
+    message: "user registered successfully",
+    user: {
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      bio: user.bio,
+      profilePic: user.profilePic,
+    },
+  })
 }
 
-const loginController = async(req, res) => {
-    const {name, username, email, password, bio, profilePic} = req.body
+const loginController = async (req, res) => {
+  const { name, username, email, password, bio, profilePic } = req.body
 
-    const user = await userModel.findOne({
-        $or: [
-            {username: username},
-            {email: email}
-        ]
+  const user = await userModel.findOne({
+    $or: [{ username: username }, { email: email }],
+  })
+
+  if (!user) {
+    return res.status(404).json({
+      message: "user not found",
     })
+  }
 
-    if(!user){
-        return res.status(404).json({
-            message: "user not found"
-        })
-    }
+  const isPasswordMatched = await bcrypt.compare(password, user.password)
 
-    const isPasswordMatched = await bcrypt.compare(password, user.password)
-
-    if(!isPasswordMatched){
-        return res.status(401).json({
-            message: "invalid password"
-        })
-    }
-
-    const token = jwt.sign(
-        {
-            id: user.id, 
-            username: user.username
-        },
-        process.env.JWT_SECRET,
-        {expiresIn: "1d"}
-    )
-
-    res.cookie("token", token)
-
-    res.status(200).json({
-        message: "user loggedin successfully",
-        user: {
-            name: user.name, 
-            username: user.username, 
-            email: user.email, 
-            bio: user.bio, 
-            profilePic: user.profilePic
-        }
+  if (!isPasswordMatched) {
+    return res.status(401).json({
+      message: "invalid password",
     })
+  }
+
+  const token = jwt.sign(
+    {
+      id: user.id,
+      username: user.username,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" },
+  )
+
+  res.cookie("token", token)
+
+  res.status(200).json({
+    message: "user loggedin successfully",
+    user: {
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      bio: user.bio,
+      profilePic: user.profilePic,
+    },
+  })
+}
+
+const getMeController = async (req, res) => {
+  const userId = req.user.id
+
+  const user = await userModel.findOne({
+    userId,
+  })
+
+  res.status(200).json({
+    message: "Currently logged user",
+    user: {
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      bio: user.bio,
+      profilePic: user.profilePic,
+    },
+  })
 }
 
 module.exports = {
-    registerController,
-    loginController
+  registerController,
+  loginController,
+  getMeController,
 }
