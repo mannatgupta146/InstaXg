@@ -2,7 +2,6 @@ import React from "react"
 import { useState } from 'react'
 import '../style/form.scss'
 import { Link } from "react-router-dom"
-import axios from 'axios'
 import { useAuth } from "../hooks/useAuth"
 
 const Register = () => {
@@ -15,10 +14,7 @@ const Register = () => {
   const handleSubmit = async(e) => {
     e.preventDefault()
 
-    handleRegister(username, email, password)
-        .then(res => {
-          console.log(res.data);
-        })
+   await handleRegister(username, email, password)
   }
 
   return (

@@ -14,6 +14,7 @@ export const AuthProvider = ({children}) => {
         try {
             const response = await register(username, email, password)            
             setUser(response.user)
+            return response
 
         } catch (error) {
             console.log(error);
@@ -28,6 +29,7 @@ export const AuthProvider = ({children}) => {
         try {
             const response = await login(username, password)            
             setUser(response.user)
+            return response
 
         } catch (error) {
             console.log(error);
