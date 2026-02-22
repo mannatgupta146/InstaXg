@@ -10,7 +10,7 @@ const Login = () => {
 
   const navigate = useNavigate()
 
-  const { handleLogin, loading } = useAuth()
+  const {user, handleLogin, loading } = useAuth()
 
   if(loading){
     return (
