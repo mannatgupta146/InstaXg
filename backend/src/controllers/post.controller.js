@@ -123,10 +123,36 @@ const postLikeController = async (req, res) => {
   })
 }
 
+const getFeedController = async (req, res) => {
+  const username = req.user.username
+
+    // 1️⃣ find users you follow
+    const following = await followModel.find({
+      follower: username,
+      status: "accepted"
+    }).select("followee -_id")
+
+    // 2️⃣ extract usernames
+    const followingUsers = following.map(f => f.followee)
+
+    // include own posts
+    followingUsers.push(username)
+
+    // 3️⃣ get posts
+    const posts = await postModel.find({
+      username: { $in: followingUsers }
+    }).populate("user").sort({ createdAt: -1 })
+
+    res.status(200).json({
+      message: "Feed fetched successfully",
+      posts
+    })
+}
 
 module.exports = {
   createPostController,
   getPostController,
   getPostDetailsController,
-  postLikeController
+  postLikeController,
+  getFeedController
 }

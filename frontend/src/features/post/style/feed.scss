@@ -1,0 +1,128 @@
+.feed-container {
+  display: flex;
+  justify-content: center;
+  background: #fafafa;
+  min-height: 100vh;
+  padding-top: 20px;
+}
+
+.feed {
+  width: 350px;
+}
+
+.post-card {
+  background: white;
+  border: 1px solid #dbdbdb;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+/* HEADER */
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info img {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+}
+
+.user-info span {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.unfollow-btn {
+  border: none;
+  background: #efefef;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: 0.2s;
+}
+
+.unfollow-btn:hover {
+  background: #ddd;
+}
+
+/* POST IMAGE */
+
+.img-wrapper {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #feda75,
+    #fa7e1e,
+    #d62976,
+    #962fbf,
+    #4f5bd5,
+    #feda75
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* white gap circle */
+.inner-circle {
+  width: 40px;   /* controls gap */
+  height: 40px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* image */
+.inner-circle img {
+  width: 36px;   /* controls photo size */
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.post-image img {
+  width: 100%;
+  display: block;
+}
+
+/* ACTIONS */
+
+.post-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  font-size: 20px;
+}
+
+.left-icons i {
+  margin-right: 14px;
+  cursor: pointer;
+}
+
+.right-icon i {
+  cursor: pointer;
+}
+
+/* CAPTION */
+
+.post-caption {
+  padding: 0 14px 14px;
+  font-size: 14px;
+}
