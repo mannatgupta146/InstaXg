@@ -235,27 +235,17 @@ const UserProfile = () => {
             </div>
             {isOwnProfile ? (
               <button
-                className="edit-btn"
+                className="edit"
                 onClick={() => {
                   setEditBio(user.bio || "")
                   setIsEditing(true)
                 }}
-                style={{
-                  minWidth: 120,
-                  fontWeight: 700,
-                  fontSize: 15,
-                  letterSpacing: 0.2,
-                  border: "1.5px solid #0095f6",
-                  color: "#0095f6",
-                  background: "#fff",
-                  boxShadow: "0 1px 4px rgba(0,149,246,0.07)",
-                }}
               >
-                ✏️ Edit Profile
+                Edit Profile
               </button>
             ) : (
               <button
-                className={`action-btn ${isFollowing ? "following" : "follow"}`}
+                className={`action ${isFollowing ? "following" : "follow"}`}
                 onClick={handleFollow}
                 disabled={followLoading}
               >
@@ -309,7 +299,7 @@ const UserProfile = () => {
                 />
               </div>
 
-              <label className="upload-btn">
+              <label className="upload">
                 Choose new picture
                 <input
                   type="file"
@@ -327,7 +317,7 @@ const UserProfile = () => {
             </div>
 
             <div className="modal-buttons">
-              <button onClick={handleEditProfile} className="save-btn">
+              <button onClick={handleEditProfile} className="save">
                 Save
               </button>
               <button
@@ -335,7 +325,7 @@ const UserProfile = () => {
                   setIsEditing(false)
                   setProfilePicFile(null)
                 }}
-                className="cancel-btn"
+                className="cancel"
               >
                 Cancel
               </button>
@@ -353,7 +343,7 @@ const UserProfile = () => {
               <span>{f.follower}</span>
               {isOwnProfile && (
                 <button
-                  className="remove-btn"
+                  className="remove"
                   onClick={() => handleRemoveFollower(f.follower)}
                 >
                   Remove
@@ -373,7 +363,7 @@ const UserProfile = () => {
               <span>{f.followee}</span>
               {isOwnProfile && (
                 <button
-                  className="unfollow-item-btn"
+                  className="unfollow-item"
                   onClick={() => handleUnfollowUser(f.followee)}
                 >
                   Unfollow
@@ -391,7 +381,7 @@ const UserProfile = () => {
             <img src={post.imgUrl} alt="" />
             {isOwnProfile && (
               <button
-                className="delete-btn"
+                className="delete"
                 onClick={() => handleDeletePost(post._id)}
               >
                 Delete

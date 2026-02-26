@@ -64,7 +64,7 @@ const CreatePost = () => {
             onChange={(e) => setCaption(e.target.value)}
           />
 
-          <button disabled={loading}>{loading ? "Posting..." : "Share"}</button>
+          <button className="post-btn" disabled={loading}>{loading ? "Posting..." : "Share"}</button>
         </form>
       </div>
     </main>

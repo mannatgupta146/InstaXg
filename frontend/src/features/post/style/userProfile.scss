@@ -6,6 +6,7 @@
   max-width: 1000px;
   margin: auto;
   padding: 18px 12px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 .profile-header {
@@ -31,43 +32,21 @@
 }
 
 .profile-img {
-  width: 150px;
-  height: 150px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
   border: 4px solid #eaeaea;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
 }
 
-/* CHANGE PIC BUTTON */
-
-.edit-pic-label {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: #0095f6;
-  color: white;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  border: 2px solid #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  transition: transform 0.12s ease;
-}
-
-.edit-pic-label:hover {
-  transform: scale(1.05);
-}
-
 /* INFO SECTION */
 
 .profile-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .header-top {
@@ -79,13 +58,13 @@
 
 .user-title h2 {
   margin: 0;
-  font-size: 26px;
+  font-size: 24px;
   letter-spacing: 0.6px;
 }
 
 .display-name {
   color: #777;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 /* STATS */
@@ -93,70 +72,76 @@
 .stats {
   display: flex;
   gap: 24px;
-  margin: 12px 0 18px;
+  margin: 12px 0;
   align-items: center;
 }
 
 .stats span {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   cursor: pointer;
   transition: 0.2s;
+  font-size: 20px;
 }
 
 .stats span:hover {
   color: #0095f6;
   transform: translateY(-2px);
+  font-weight: 600;
 }
 
 .stats strong {
   font-size: 20px;
   color: #222;
+  font-weight: 500;
 }
 
 /* BIO */
 
 .bio {
-  margin-top: 8px;
-  color: #666;
+  margin-top: 6px;
+  color: #555;
   line-height: 1.5;
-  max-width: 520px;
+  max-width: 420px;
+  text-align: left;
 }
-/* BUTTONS */
 
-.edit-btn,
-.action-btn {
-  padding: 10px 24px;
-  border-radius: 8px;
+/* ================= BUTTON BASE ================= */
+
+.edit,
+.action {
+  background: #345bb5; 
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 10px; 
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid #ddd;
-  background: white;
-  transition: 0.2s;
+  letter-spacing: 0.3px;
+  transition: all 0.22s ease;
 }
 
-.edit-btn:hover {
-  border-color: #0095f6;
-  color: #0095f6;
+/* HOVER — smooth & premium */
+
+.edit:hover {
+  padding: 11px 24px;
 }
 
-.action-btn.follow {
-  background: #0095f6;
-  border-color: #0095f6;
-  color: white;
+/* CLICK FEEL */
+
+.edit:active,
+.action:active {
+  transform: translateY(10px);
 }
 
-.action-btn.follow:hover {
-  background: #007cd1;
+/* FOLLOWING STATE */
+
+.action.following {
+  background: transparent;
+  color: #0f172a;
+  border: 2px solid #e5e7eb;
 }
 
-.action-btn.following {
-  background: #f0f0f0;
-}
-
-.action-btn.following:hover {
-  background: #e5e5e5;
+.action.following:hover {
+  background: #000000;
 }
 
 /* =========================
@@ -183,8 +168,8 @@
   border-bottom: 1px solid #eee;
 }
 
-.remove-btn,
-.unfollow-item-btn {
+.remove,
+.unfollow-item {
   background: #f0f0f0;
   border: none;
   padding: 6px 12px;
@@ -194,8 +179,8 @@
   transition: 0.2s;
 }
 
-.remove-btn:hover,
-.unfollow-item-btn:hover {
+.remove:hover,
+.unfollow-item:hover {
   background: #ff4458;
   color: white;
 }
@@ -228,7 +213,7 @@
 
 /* DELETE BUTTON */
 
-.delete-btn {
+.delete {
   position: absolute;
   bottom: 10px;
   right: 10px;
@@ -278,7 +263,7 @@
   margin-bottom: 18px;
 }
 
-.upload-btn {
+.upload {
   padding: 8px 12px;
   background: #f0f0f0;
   border-radius: 8px;
@@ -303,8 +288,8 @@
   margin-top: 10px;
 }
 
-.save-btn {
-  background: #0095f6;
+.save {
+  background: #f1f9ff;
   color: white;
   padding: 10px 22px;
   border-radius: 8px;
@@ -313,7 +298,7 @@
   font-weight: 600;
 }
 
-.cancel-btn {
+.cancel {
   background: #f0f0f0;
   padding: 10px 22px;
   border-radius: 8px;
