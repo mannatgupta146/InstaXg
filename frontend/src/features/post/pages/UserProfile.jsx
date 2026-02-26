@@ -132,7 +132,32 @@ const UserProfile = () => {
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0]
     if (file) {
+      // If user is editing via modal, keep it in state for preview.
+      // If user clicked the small change button on their profile, upload immediately.
+      if (isOwnProfile && !isEditing) {
+        uploadProfilePic(file)
+      } else {
+        setProfilePicFile(file)
+      }
+    }
+  }
+
+  const uploadProfilePic = async (file) => {
+    try {
+      const formData = new FormData()
+      formData.append("profilePic", file)
+      // show temporary preview immediately
       setProfilePicFile(file)
+      const res = await api.patch("/api/users/profile", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      setUser(res.data.user)
+      setProfilePicFile(null)
+      console.log("✅ Profile picture updated")
+    } catch (err) {
+      console.error("Upload error:", err)
+      alert(err.response?.data?.message || "Error uploading profile picture")
+      setProfilePicFile(null)
     }
   }
 
@@ -153,6 +178,21 @@ const UserProfile = () => {
       alert(err.response?.data?.message || "Error toggling follow")
     } finally {
       setFollowLoading(false)
+    }
+  }
+
+  const handleUnfollowUser = async (usernameToUnfollow) => {
+    if (!window.confirm(`Unfollow ${usernameToUnfollow}?`)) return
+    try {
+      await api.post(`/api/users/unfollow/${usernameToUnfollow}`)
+      setFollowing((prev) =>
+        prev.filter((f) => f.followee !== usernameToUnfollow),
+      )
+      // If viewing own profile and unfollowed someone, also adjust UI feedback
+      console.log("✅ Unfollowed:", usernameToUnfollow)
+    } catch (err) {
+      console.error("Unfollow error:", err)
+      alert(err.response?.data?.message || "Error unfollowing user")
     }
   }
 
@@ -185,22 +225,14 @@ const UserProfile = () => {
             }
             alt="profile"
           />
-          {isOwnProfile && (
-            <label className="edit-pic-label">
-              📷 Change
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleProfilePicChange}
-                hidden
-              />
-            </label>
-          )}
         </div>
 
         <div className="profile-info">
           <div className="header-top">
-            <h2>{user.username}</h2>
+            <div className="user-title">
+              <h2>{user.username}</h2>
+              {user.name && <div className="display-name">{user.name}</div>}
+            </div>
             {isOwnProfile ? (
               <button
                 className="edit-btn"
@@ -208,8 +240,18 @@ const UserProfile = () => {
                   setEditBio(user.bio || "")
                   setIsEditing(true)
                 }}
+                style={{
+                  minWidth: 120,
+                  fontWeight: 700,
+                  fontSize: 15,
+                  letterSpacing: 0.2,
+                  border: "1.5px solid #0095f6",
+                  color: "#0095f6",
+                  background: "#fff",
+                  boxShadow: "0 1px 4px rgba(0,149,246,0.07)",
+                }}
               >
-                Edit Profile
+                ✏️ Edit Profile
               </button>
             ) : (
               <button
@@ -250,17 +292,40 @@ const UserProfile = () => {
       {isEditing && (
         <div className="modal-overlay">
           <div className="modal-box">
-            <h3>Edit Profile</h3>
-            {profilePicFile && (
-              <div className="preview-pic">
-                <img src={URL.createObjectURL(profilePicFile)} alt="preview" />
+            <div className="modal-header">
+              <h3>Edit Profile</h3>
+            </div>
+
+            <div className="modal-body">
+              <div className="current-pic">
+                <img
+                  src={
+                    profilePicFile
+                      ? URL.createObjectURL(profilePicFile)
+                      : user.profilePic ||
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23e0e0e0' width='100' height='100'/%3E%3Ccircle cx='50' cy='35' r='20' fill='%23999'/%3E%3Cpath d='M 20 100 Q 20 60 50 60 Q 80 60 80 100' fill='%23999'/%3E%3C/svg%3E"
+                  }
+                  alt="profile preview"
+                />
               </div>
-            )}
-            <textarea
-              value={editBio}
-              onChange={(e) => setEditBio(e.target.value)}
-              placeholder="Write your bio..."
-            />
+
+              <label className="upload-btn">
+                Choose new picture
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePicChange}
+                  hidden
+                />
+              </label>
+
+              <textarea
+                value={editBio}
+                onChange={(e) => setEditBio(e.target.value)}
+                placeholder="Write your bio..."
+              />
+            </div>
+
             <div className="modal-buttons">
               <button onClick={handleEditProfile} className="save-btn">
                 Save
@@ -309,7 +374,7 @@ const UserProfile = () => {
               {isOwnProfile && (
                 <button
                   className="unfollow-item-btn"
-                  onClick={() => handleFollow()}
+                  onClick={() => handleUnfollowUser(f.followee)}
                 >
                   Unfollow
                 </button>

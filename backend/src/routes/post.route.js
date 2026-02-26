@@ -38,6 +38,13 @@ postRouter.get(
 postRouter.get("/feed", identifyUser, postContoller.getFeedController)
 
 /**
+ * @route   DELETE /api/posts/:postId
+ * @desc    Delete a post (owner only)
+ * @access  Private
+ */
+postRouter.delete("/:postId", identifyUser, postContoller.deletePostController)
+
+/**
  * @route   POST /api/posts/like/:postId
  * @desc    Like or unlike a post
  * @access  Private (Authenticated users only)

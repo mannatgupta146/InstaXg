@@ -36,7 +36,7 @@ const CreatePost = () => {
     try {
       setLoading(true)
       await createPost(formData)
-      navigate("/")
+      navigate("/", { state: { refresh: true } })
     } catch (err) {
       console.error(err.response?.data?.message)
     } finally {

@@ -8,18 +8,22 @@ export const usePost = () => {
 
     const {post, setPost, feed, setFeed, loading, setLoading} = context
 
-    const handleGetFeed = async () => {
-        setLoading(true)
-        try {
-            const data = await getFeed()
-            setFeed(data.posts)
-            
-        } catch (error) {
-            throw error
-        } finally {
-            setLoading(false)
-        }
+const handleGetFeed = async () => {
+    setLoading(true)
+    try {
+        const data = await getFeed()
+
+        console.log("🔥 FEED DATA:", data)   // 👈 ADD
+        console.log("🔥 POSTS:", data.posts)
+
+        setFeed(data.posts)
+
+    } catch (error) {
+        console.error(error)
+    } finally {
+        setLoading(false)
     }
+}
 
     return {post, setPost, feed, setFeed, loading, setLoading, handleGetFeed}
 }

@@ -55,6 +55,7 @@ const registerController = async (req, res) => {
 
 const loginController = async (req, res) => {
   const { name, username, email, password, bio, profilePic } = req.body
+ 
 
   const user = await userModel.findOne({
     $or: [{ username: username }, { email: email }],
@@ -88,6 +89,9 @@ res.cookie("token", token, {
   secure: false,      // true only in production HTTPS
   sameSite: "lax",
 });
+
+ console.log("LOGIN BODY:", req.body);
+console.log("USER FOUND:", user);
 
   res.status(200).json({
     message: "user loggedin successfully",

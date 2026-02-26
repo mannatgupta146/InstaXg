@@ -1,6 +1,8 @@
 const express = require("express")
 const identifyUser = require("../middlewares/auth.middleware")
 const userController = require("../controllers/user.controller")
+const multer = require("multer")
+const upload = multer({ storage: multer.memoryStorage() })
 
 const userRouter = express.Router()
 
@@ -84,6 +86,7 @@ userRouter.get("/profile", identifyUser, userController.getProfileController)
  */
 userRouter.patch(
   "/profile",
+  upload.single("profilePic"),
   identifyUser,
   userController.updateProfileController,
 )
