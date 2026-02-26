@@ -124,35 +124,57 @@ const postLikeController = async (req, res) => {
 }
 
 const getFeedController = async (req, res) => {
-  const username = req.user.username
+  try {
+    const username = req.user.username;
+    const userId = req.user.id;
 
-    // 1️⃣ find users you follow
+    // 1️⃣ find accepted following
     const following = await followModel.find({
       follower: username,
       status: "accepted"
-    }).select("followee -_id")
+    }).select("followee -_id");
 
     // 2️⃣ extract usernames
-    const followingUsers = following.map(f => f.followee)
+    const followingUsers = following.map(f => f.followee);
 
-    // include own posts
-    followingUsers.push(username)
-
-    // 3️⃣ get posts
-    const posts = await postModel.find({
-      username: { $in: followingUsers }
-    }).populate("user").sort({ createdAt: -1 })
+    // 3️⃣ get posts from following + own posts
+    const posts = await postModel
+      .find({
+        $or: [
+          { username: { $in: followingUsers } }, // followed users
+          { user: userId }                       // own posts
+        ]
+      })
+      .sort({ createdAt: -1 }); // newest first
 
     res.status(200).json({
       message: "Feed fetched successfully",
       posts
-    })
-}
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error fetching feed"
+    });
+  }
+};
+
+const getUserPostsController = async (req, res) => {
+  const username = req.params.username;
+
+  const posts = await postModel.find({ username }).sort({ createdAt: -1 });
+
+  res.status(200).json({
+    posts
+  });
+};
 
 module.exports = {
   createPostController,
   getPostController,
   getPostDetailsController,
   postLikeController,
-  getFeedController
+  getFeedController,
+  getUserPostsController
 }

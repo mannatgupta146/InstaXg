@@ -23,6 +23,8 @@ const Login = () => {
 
     const res = await handleLogin(username, password)
 
+    localStorage.setItem("user", JSON.stringify(res.user));
+
     console.log(res);
     console.log(res.user);
 
