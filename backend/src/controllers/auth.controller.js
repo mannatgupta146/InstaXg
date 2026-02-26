@@ -35,7 +35,11 @@ const registerController = async (req, res) => {
     { expiresIn: "1d" },
   )
 
-  res.cookie("token", token)
+  res.cookie("token", token, {
+  httpOnly: true,
+  secure: false,      // true only in production HTTPS
+  sameSite: "lax",
+});
 
   res.status(201).json({
     message: "user registered successfully",
@@ -79,7 +83,11 @@ const loginController = async (req, res) => {
     { expiresIn: "1d" },
   )
 
-  res.cookie("token", token)
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: false,      // true only in production HTTPS
+  sameSite: "lax",
+});
 
   res.status(200).json({
     message: "user loggedin successfully",
@@ -94,11 +102,11 @@ const loginController = async (req, res) => {
 }
 
 const getMeController = async (req, res) => {
-  const userId = req.user.id
+  const user = await userModel.findById(req.user.id);
 
-  const user = await userModel.findOne({
-    userId,
-  })
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
 
   res.status(200).json({
     message: "Currently logged user",
@@ -109,9 +117,8 @@ const getMeController = async (req, res) => {
       bio: user.bio,
       profilePic: user.profilePic,
     },
-  })
-}
-
+  });
+};
 module.exports = {
   registerController,
   loginController,

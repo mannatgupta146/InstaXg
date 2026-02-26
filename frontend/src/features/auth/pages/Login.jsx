@@ -10,25 +10,23 @@ const Login = () => {
 
   const navigate = useNavigate()
 
-  const {user, handleLogin, loading } = useAuth()
+  const { user, handleLogin, loading } = useAuth()
 
-  if(loading){
-    return (
-      <h1>Loading...</h1>
-    )
+  if (loading) {
+    return <h1>Loading...</h1>
   }
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const res = await handleLogin(username, password)
-
-    localStorage.setItem("user", JSON.stringify(res.user));
-
-    console.log(res);
-    console.log(res.user);
-
-    navigate('/')
+    try {
+      const res = await handleLogin(username, password)
+      console.log("✅ Logged in:", res.user)
+      navigate("/")
+    } catch (err) {
+      console.error("❌ Login error:", err)
+      alert("Login failed: " + (err.response?.data?.message || err.message))
+    }
   }
 
   return (

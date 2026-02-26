@@ -23,6 +23,6 @@ authRouter.post("/login", authController.loginController)
  * @desc    Get the currently logged user information
  * @access  Private
  */
-authRouter.post("/get-me", identifyUser, authController.getMeController)
+authRouter.get("/get-me", identifyUser, authController.getMeController)
 
 module.exports = authRouter

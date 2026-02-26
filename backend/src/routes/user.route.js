@@ -48,7 +48,6 @@ userRouter.patch(
   userController.updateFollowRequestController,
 )
 
-
 /**
  * @route   GET /api/users/followers
  * @desc    Get all followers of logged-in user
@@ -69,6 +68,24 @@ userRouter.get(
   "/following",
   identifyUser,
   userController.getFollowingController,
+)
+
+/**
+ * @route   GET /api/users/profile
+ * @desc    Get logged in user profile
+ * @access  Private
+ */
+userRouter.get("/profile", identifyUser, userController.getProfileController)
+
+/**
+ * @route   PATCH /api/users/profile
+ * @desc    Update logged in user profile
+ * @access  Private
+ */
+userRouter.patch(
+  "/profile",
+  identifyUser,
+  userController.updateProfileController,
 )
 
 module.exports = userRouter

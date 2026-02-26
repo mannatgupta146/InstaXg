@@ -1,5 +1,6 @@
 const followModel = require("../models/follow.model")
 const postModel = require("../models/post.model")
+const userModel = require("../models/user.model")
 const ImageKit = require("@imagekit/nodejs")
 
 const imagekit = new ImageKit({
@@ -68,12 +69,12 @@ const getPostDetailsController = async (req, res) => {
   const followRelation = await followModel.findOne({
     follower: username,
     followee: post.username, // or owner's username
-    status: "accepted"
+    status: "accepted",
   })
 
   if (!followRelation) {
     return res.status(403).json({
-      message: "Follow user to view posts"
+      message: "Follow user to view posts",
     })
   }
 
@@ -84,7 +85,6 @@ const getPostDetailsController = async (req, res) => {
 }
 
 const postLikeController = async (req, res) => {
-
   const username = req.user.username
   const postId = req.params.postId
 
@@ -92,82 +92,91 @@ const postLikeController = async (req, res) => {
 
   if (!post) {
     return res.status(404).json({
-      message: "No post exists"
+      message: "No post exists",
     })
   }
 
   // allow owner
   if (post.username !== username) {
-
     const relation = await followModel.findOne({
       follower: username,
       followee: post.username,
-      status: "accepted"
+      status: "accepted",
     })
 
     if (!relation) {
       return res.status(403).json({
-        message: "Follow user to like posts"
+        message: "Follow user to like posts",
       })
     }
   }
 
   const like = await likeModel.create({
     user: username,
-    post: postId
+    post: postId,
   })
 
   res.status(200).json({
     message: "post liked successfully",
-    like
+    like,
   })
 }
 
 const getFeedController = async (req, res) => {
-  try {
-    const username = req.user.username;
-    const userId = req.user.id;
+  const username = req.user.username;
 
-    // 1️⃣ find accepted following
-    const following = await followModel.find({
-      follower: username,
-      status: "accepted"
-    }).select("followee -_id");
+  // find accepted following
+  const following = await followModel.find({
+    follower: username,
+    status: "accepted"
+  }).select("followee");
 
-    // 2️⃣ extract usernames
-    const followingUsers = following.map(f => f.followee);
+  const followingUsers = following.map(f => f.followee);
+  followingUsers.push(username);
 
-    // 3️⃣ get posts from following + own posts
-    const posts = await postModel
-      .find({
-        $or: [
-          { username: { $in: followingUsers } }, // followed users
-          { user: userId }                       // own posts
-        ]
-      })
-      .sort({ createdAt: -1 }); // newest first
+  // get posts
+  const posts = await postModel.find({
+    username: { $in: followingUsers }
+  }).sort({ createdAt: -1 });
 
-    res.status(200).json({
-      message: "Feed fetched successfully",
-      posts
-    });
+  // attach profilePic manually
+  const postsWithUserData = await Promise.all(
+    posts.map(async (post) => {
+      const user = await userModel.findOne(
+        { username: post.username },
+        "profilePic"
+      );
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Error fetching feed"
-    });
-  }
+      return {
+        ...post.toObject(),
+        profilePic: user?.profilePic || null
+      };
+    })
+  );
+
+  res.status(200).json({
+    posts: postsWithUserData
+  });
 };
+
 
 const getUserPostsController = async (req, res) => {
   const username = req.params.username;
 
-  const posts = await postModel.find({ username }).sort({ createdAt: -1 });
+  const posts = await postModel.find({ username })
+    .sort({ createdAt: -1 });
 
-  res.status(200).json({
-    posts
-  });
+  const user = await userModel.findOne(
+    { username },
+    "profilePic"
+  );
+
+  const postsWithPic = posts.map(post => ({
+    ...post.toObject(),
+    profilePic: user?.profilePic || null
+  }));
+
+  res.json({ posts: postsWithPic });
 };
 
 module.exports = {
@@ -176,5 +185,5 @@ module.exports = {
   getPostDetailsController,
   postLikeController,
   getFeedController,
-  getUserPostsController
+  getUserPostsController,
 }

@@ -20,13 +20,6 @@ postRouter.post(
 )
 
 /**
- * @route   GET /api/posts
- * @desc    Get all posts (feed)
- * @access  Private (Authenticated users only)
- */
-postRouter.get("/", identifyUser, postContoller.getPostController)
-
-/**
  * @route   GET /api/posts/details/:postId
  * @desc    Get details of a specific post
  * @access  Private (Authenticated users only)
@@ -38,18 +31,18 @@ postRouter.get(
 )
 
 /**
+ * @route   GET /api/posts/feed
+ * @desc    Get feed posts from following
+ * @access  Private (Authenticated users only)
+ */
+postRouter.get("/feed", identifyUser, postContoller.getFeedController)
+
+/**
  * @route   POST /api/posts/like/:postId
  * @desc    Like or unlike a post
  * @access  Private (Authenticated users only)
  */
 postRouter.post("/like/:postId", identifyUser, postContoller.postLikeController)
-
-/**
- * @route   GET /api/posts/feed
- * @desc    Get all the posts
- * @access  Private (Authenticated users only)
- */
-postRouter.get("/feed", identifyUser, postContoller.getFeedController)
 
 /**
  *  @route   GET /api/posts/user/:username
@@ -61,5 +54,12 @@ postRouter.get(
   identifyUser,
   postContoller.getUserPostsController,
 )
+
+/**
+ * @route   GET /api/posts
+ * @desc    Get all posts (current user's posts)
+ * @access  Private (Authenticated users only)
+ */
+postRouter.get("/", identifyUser, postContoller.getPostController)
 
 module.exports = postRouter
