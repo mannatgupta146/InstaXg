@@ -4,6 +4,7 @@ import Login from "./features/auth/pages/Login"
 import Feed from "./features/post/pages/Feed"
 import CreatePost from "./features/post/pages/CreatePost"
 import UserProfile from "./features/post/pages/UserProfile"
+import Search from "./features/post/pages/Search"
 
 export const router = createBrowserRouter([
   {
@@ -30,4 +31,11 @@ export const router = createBrowserRouter([
     path: "/profile",
     element: <UserProfile />,
   },
+
+  {
+    path: "/search",
+    element: <Search />
+  },
+
+  
 ])

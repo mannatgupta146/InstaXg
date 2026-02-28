@@ -1,16 +1,17 @@
 /* =========================
-   VARIABLES & RESET
+   VARIABLES
 ========================= */
 $primary: #6366f1;
 $primary-dark: #4f46e5;
-$bg-color: #f0f4f8;
 $text-main: #1a202c;
 $text-muted: #64748b;
 $white: #ffffff;
-$radius: 1rem;
 
+/* =========================
+   CONTAINER
+========================= */
 .profile-container {
-  max-width: 935px; /* Standard Instagram-style width */
+  max-width: 935px;
   margin: 0 auto;
   padding: 2rem 1rem;
   font-family: 'Inter', system-ui, sans-serif;
@@ -23,13 +24,12 @@ $radius: 1rem;
   display: flex;
   gap: 3rem;
   margin-bottom: 3rem;
-  align-items: flex-start;
   padding: 0 1rem;
 }
 
 .profile-pic-section {
   flex-shrink: 0;
-  
+
   .profile-img {
     width: 150px;
     height: 150px;
@@ -54,36 +54,32 @@ $radius: 1rem;
   gap: 1.5rem;
   flex-wrap: wrap;
 
-  .user-title {
-    h2 {
-      margin: 0;
-      font-size: 1.75rem;
-      font-weight: 300;
-      color: $text-main;
-    }
-    .display-name {
-      color: $text-muted;
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
+  h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 300;
+    color: $text-main;
   }
 }
 
-/* STATS */
+/* =========================
+   STATS
+========================= */
 .stats {
   display: flex;
   gap: 2.5rem;
-  
+
   span {
     font-size: 1rem;
     color: $text-main;
-    
+
     strong {
       font-weight: 700;
     }
-    
-    &[style*="cursor: pointer"]:hover {
+
+    &:hover {
       text-decoration: underline;
+      cursor: pointer;
     }
   }
 }
@@ -92,46 +88,152 @@ $radius: 1rem;
   font-size: 0.95rem;
   line-height: 1.5;
   color: $text-main;
-  white-space: pre-wrap;
-  margin: 0;
-  align-self: self-start;
 }
 
 /* =========================
    BUTTONS
 ========================= */
-.edit, .action {
+.edit,
+.action {
   background: $white;
-  color: $text-main;
   border: 1px solid #dbdbdb;
-  padding: 0.4rem 1.2rem;
+  padding: 6px 18px;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 0.2s;
 
   &:hover {
     background: #fafafa;
-    border-color: #a8a8a8;
   }
+}
 
-  &:active {
-    opacity: 0.7;
-    transform: scale(0.98);
+.action.follow {
+  background: $primary;
+  color: white;
+  border: none;
+
+  &:hover {
+    background: $primary-dark;
   }
+}
 
-  &.follow {
-    background: $primary;
-    color: $white;
-    border: none;
-    &:hover { background: $primary-dark; }
+.action.following {
+  background: #efefef;
+  border: none;
+
+  &:hover {
+    background: #dbdbdb;
   }
+}
 
-  &.following {
-    background: #efefef;
-    border: none;
-    &:hover { background: #dbdbdb; }
+/* =========================
+   FOLLOW REQUESTS & LISTS
+========================= */
+.list-box {
+  margin-top: 20px;
+  background: $white;
+  border: 1px solid #dbdbdb;
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+
+.list-box h3 {
+  margin-bottom: 10px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: $text-muted;
+}
+
+/* common row */
+.request-item,
+.follower-item,
+.following-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+
+  &:first-child {
+    border-top: none;
+  }
+}
+
+/* differentiate following */
+.following-item span {
+  color: $text-muted;
+  font-weight: 500;
+}
+
+/* =========================
+   REQUEST BUTTONS
+========================= */
+.request-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.accept {
+  background: #22c55e;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #16a34a;
+  }
+}
+
+.reject {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #dc2626;
+  }
+}
+
+/* =========================
+   REMOVE & UNFOLLOW
+========================= */
+.remove {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+
+  &:hover {
+    background: #dc2626;
+  }
+}
+
+.unfollow-item {
+  background: #f1f5f9;
+  border: none;
+  color: #334155;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #e2e8f0;
   }
 }
 
@@ -140,7 +242,7 @@ $radius: 1rem;
 ========================= */
 .posts-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); // Strict 3-column grid
+  grid-template-columns: repeat(3, 1fr);
   gap: 28px;
   border-top: 1px solid #dbdbdb;
   padding-top: 3rem;
@@ -151,17 +253,15 @@ $radius: 1rem;
   aspect-ratio: 1/1;
   background: #fafafa;
   overflow: hidden;
-  cursor: pointer;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: filter 0.3s ease;
   }
 
   &:hover img {
-    filter: brightness(0.8);
+    filter: brightness(0.85);
   }
 
   .delete {
@@ -173,10 +273,10 @@ $radius: 1rem;
     border: none;
     padding: 5px 10px;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: 11px;
     font-weight: 600;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: 0.2s;
   }
 
   &:hover .delete {
@@ -185,7 +285,7 @@ $radius: 1rem;
 }
 
 /* =========================
-   MODALS & LISTS
+   MODAL
 ========================= */
 .modal-overlay {
   position: fixed;
@@ -195,8 +295,6 @@ $radius: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
 }
 
 .modal-box {
@@ -204,76 +302,30 @@ $radius: 1rem;
   border-radius: 12px;
   width: 100%;
   max-width: 400px;
-  max-height: 90vh;
-  overflow-y: auto;
-  
-  .modal-header {
-    padding: 1rem;
-    border-bottom: 1px solid #dbdbdb;
-    text-align: center;
-    h3 { margin: 0; font-size: 1rem; }
-  }
-
-  .modal-body {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-
-    .current-pic img {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-      display: block;
-      margin: 0 auto;
-    }
-
-    .upload {
-      text-align: center;
-      color: $primary;
-      font-weight: 700;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    textarea {
-      width: 100%;
-      border: 1px solid #dbdbdb;
-      border-radius: 4px;
-      padding: 10px;
-      min-height: 100px;
-      font-family: inherit;
-    }
-  }
 }
 
-.modal-buttons {
+.modal-body {
+  padding: 1.5rem;
   display: flex;
-  border-top: 1px solid #dbdbdb;
-  
-  button {
-    flex: 1;
-    padding: 1rem;
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-weight: 600;
+  flex-direction: column;
+  gap: 1rem;
+}
 
-    &.save { color: $primary; border-right: 1px solid #dbdbdb; }
-    &.cancel { color: #ed4956; }
-    &:hover { background: #fafafa; }
-  }
+textarea {
+  width: 100%;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  padding: 10px;
 }
 
 /* =========================
-   📱 RESPONSIVE
+   RESPONSIVE
 ========================= */
 @media (max-width: 768px) {
   .profile-header {
     gap: 1.5rem;
   }
-  
+
   .profile-pic-section .profile-img {
     width: 80px;
     height: 80px;
@@ -281,11 +333,10 @@ $radius: 1rem;
 
   .stats {
     gap: 1.5rem;
-    span { font-size: 0.9rem; }
   }
 
   .posts-grid {
-    gap: 3px; // Small gaps like Instagram mobile
+    gap: 3px;
     padding-top: 1rem;
   }
 }

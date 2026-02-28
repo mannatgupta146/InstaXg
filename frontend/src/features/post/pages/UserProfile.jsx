@@ -15,6 +15,7 @@ const UserProfile = () => {
   const { user: currentUser } = useContext(AuthContext)
 
   const [user, setUser] = useState(null)
+  const [requests, setRequests] = useState([])
   const [posts, setPosts] = useState([])
   const [followers, setFollowers] = useState([])
   const [following, setFollowing] = useState([])
@@ -23,7 +24,9 @@ const UserProfile = () => {
   const [editBio, setEditBio] = useState("")
   const [isEditing, setIsEditing] = useState(false)
   const [profilePicFile, setProfilePicFile] = useState(null)
-  const [isFollowing, setIsFollowing] = useState(false)
+
+  const [followStatus, setFollowStatus] = useState(null)
+  // null | pending | accepted
   const [followLoading, setFollowLoading] = useState(false)
 
   useEffect(() => {
@@ -48,6 +51,8 @@ const UserProfile = () => {
 
       const followersRes = await api.get("/api/users/followers")
       const followingRes = await api.get("/api/users/following")
+      const requestsRes = await api.get("/api/users/follow/requests")
+      setRequests(requestsRes.data.requests || [])
 
       setUser(userData)
       setPosts(postsRes.data.posts || [])
@@ -80,11 +85,11 @@ const UserProfile = () => {
       setPosts(postsRes.data.posts || [])
 
       // Check if current user is following this user
-      const followingRes = await api.get("/api/users/following")
-      const isFollowingUser = followingRes.data.following.some(
-        (f) => f.followee === userToLoad,
-      )
-      setIsFollowing(isFollowingUser)
+      const relationRes = await api.get("/api/users/all")
+
+      const relation = relationRes.data.find((u) => u.username === userToLoad)
+
+      setFollowStatus(relation?.followStatus || null)
     } catch (err) {
       console.error("❌ Error loading user profile:", err)
     }
@@ -163,19 +168,18 @@ const UserProfile = () => {
 
   const handleFollow = async () => {
     setFollowLoading(true)
+
     try {
-      if (isFollowing) {
+      // unfollow OR cancel request
+      if (followStatus === "accepted" || followStatus === "pending") {
         await api.post(`/api/users/unfollow/${user.username}`)
-        setIsFollowing(false)
-        console.log("✅ Unfollowed:", user.username)
+        setFollowStatus(null)
       } else {
         await api.post(`/api/users/follow/${user.username}`)
-        setIsFollowing(true)
-        console.log("✅ Followed:", user.username)
+        setFollowStatus("pending") // until accepted
       }
     } catch (err) {
-      console.error("Follow error:", err)
-      alert(err.response?.data?.message || "Error toggling follow")
+      alert(err.response?.data?.message || "Error updating follow")
     } finally {
       setFollowLoading(false)
     }
@@ -197,14 +201,31 @@ const UserProfile = () => {
   }
 
   const handleRemoveFollower = async (followerUsername) => {
-    if (!window.confirm(`Remove ${followerUsername} as follower?`)) return
+    if (!window.confirm(`Remove ${followerUsername}?`)) return
+
     try {
-      // This would need a backend endpoint to remove a follower
       await api.post(`/api/users/remove-follower/${followerUsername}`)
-      setFollowers(followers.filter((f) => f.follower !== followerUsername))
-      console.log("✅ Removed follower")
+
+      setFollowers((prev) =>
+        prev.filter((f) => f.follower !== followerUsername),
+      )
     } catch (err) {
-      console.error("Remove follower error:", err)
+      console.error(err)
+    }
+  }
+
+  const handleRequestAction = async (requestId, status) => {
+    try {
+      await api.patch(`/api/users/follow/request/${requestId}`, { status })
+
+      // remove request instantly
+      setRequests((prev) => prev.filter((r) => r._id !== requestId))
+
+      // 🔥 refresh followers & counts instantly
+      const followersRes = await api.get("/api/users/followers")
+      setFollowers(followersRes.data.followers || [])
+    } catch (err) {
+      console.error(err)
     }
   }
 
@@ -245,11 +266,19 @@ const UserProfile = () => {
               </button>
             ) : (
               <button
-                className={`action ${isFollowing ? "following" : "follow"}`}
+                className={`action ${
+                  followStatus === "accepted" ? "following" : "follow"
+                }`}
                 onClick={handleFollow}
                 disabled={followLoading}
               >
-                {followLoading ? "..." : isFollowing ? "Following" : "Follow"}
+                {followLoading
+                  ? "..."
+                  : followStatus === "accepted"
+                    ? "Following"
+                    : followStatus === "pending"
+                      ? "Requested"
+                      : "Follow"}
               </button>
             )}
           </div>
@@ -331,6 +360,34 @@ const UserProfile = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {isOwnProfile && requests.length > 0 && (
+        <div className="list-box">
+          <h3>Follow Requests</h3>
+
+          {requests.map((req) => (
+            <div key={req._id} className="request-item">
+              <span>{req.follower}</span>
+
+              <div className="request-actions">
+                <button
+                  className="accept"
+                  onClick={() => handleRequestAction(req._id, "accepted")}
+                >
+                  Accept
+                </button>
+
+                <button
+                  className="reject"
+                  onClick={() => handleRequestAction(req._id, "rejected")}
+                >
+                  Reject
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

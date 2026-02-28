@@ -91,4 +91,16 @@ userRouter.patch(
   userController.updateProfileController,
 )
 
+userRouter.get('/all', identifyUser, userController.getAllUsersController)
+
+/**
+ * @route   POST /api/users/remove-follower/:username
+ * @desc    Remove a follower
+ */
+userRouter.post(
+  "/remove-follower/:username",
+  identifyUser,
+  userController.removeFollowerController
+);
+
 module.exports = userRouter

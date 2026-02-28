@@ -113,7 +113,7 @@ const getFollowRequestsController = async (req, res) => {
       followee: loggedinUser,
       status: "pending",
     })
-    .select("follower createdAt status -_id")
+    .select("follower createdAt status _id")
 
   res.status(200).json({
     message: "All follow requests fetched",
@@ -175,7 +175,7 @@ const getFollowersController = async (req, res) => {
       followee: loggedInUser,
       status: "accepted",
     })
-    .select("follower createdAt -_id")
+    .select("follower createdAt _id")
 
   res.status(200).json({
     message: "Followers fetched successfully",
@@ -191,7 +191,7 @@ const getFollowingController = async (req, res) => {
       follower: loggedInUser,
       status: "accepted",
     })
-    .select("followee createdAt -_id")
+    .select("followee createdAt _id")
 
   res.status(200).json({
     message: "Following list fetched successfully",
@@ -258,6 +258,55 @@ const updateProfileController = async (req, res) => {
   }
 }
 
+const getAllUsersController = async (req, res) => {
+  const loggedUser = req.user.username;
+
+  const users = await userModel
+    .find({ username: { $ne: loggedUser } })
+    .select("username profilePic");
+
+  const relations = await followModel.find({
+    follower: loggedUser,
+  });
+
+  const relationMap = new Map();
+
+  relations.forEach(rel => {
+    relationMap.set(rel.followee, rel.status);
+  });
+
+  const result = users.map(user => ({
+    username: user.username,
+    profilePic: user.profilePic,
+    followStatus: relationMap.get(user.username) || null,
+  }));
+
+  res.status(200).json(result);
+};
+
+const removeFollowerController = async (req, res) => {
+  const loggedUser = req.user.username;
+  const followerUsername = req.params.username;
+
+  const existing = await followModel.findOne({
+    follower: followerUsername,
+    followee: loggedUser,
+    status: "accepted",
+  });
+
+  if (!existing) {
+    return res.status(404).json({
+      message: "Follower not found",
+    });
+  }
+
+  await followModel.findByIdAndDelete(existing._id);
+
+  res.status(200).json({
+    message: `${followerUsername} removed from followers`,
+  });
+};
+
 module.exports = {
   followUserController,
   unfollowUserController,
@@ -267,4 +316,6 @@ module.exports = {
   getFollowingController,
   getProfileController,
   updateProfileController,
+  getAllUsersController,
+  removeFollowerController
 }
