@@ -272,7 +272,10 @@ const getAllUsersController = async (req, res) => {
   const relationMap = new Map();
 
   relations.forEach(rel => {
-    relationMap.set(rel.followee, rel.status);
+    // ❌ do NOT return rejected
+if (rel.status === "accepted" || rel.status === "pending") {
+  relationMap.set(rel.followee, rel.status);
+}
   });
 
   const result = users.map(user => ({
