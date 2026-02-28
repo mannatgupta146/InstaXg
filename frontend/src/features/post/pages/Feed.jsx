@@ -1,24 +1,35 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import "../style/feed.scss";
 import { usePost } from "../hooks/usePost";
 import Post from "../components/Post";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../auth/context/auth.context";
 
 const Feed = () => {
   const { feed, handleGetFeed, loading } = usePost();
+  const { user, loading: authLoading, isAuthenticated } = useContext(AuthContext);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // wait until auth check completes
+    if (authLoading) return;
+
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
     handleGetFeed();
-  }, [location.state]);
+  }, [authLoading, isAuthenticated, location.state]);
 
-  if (loading) {
-    return <div className="loading">Loading...</div>;
-  }
+  // prevent flicker while checking auth
+  if (authLoading) return null;
 
-  if (feed.length === 0) {
+  if (loading) return <div className="loading">Loading...</div>;
+
+  if (feed.length === 0)
     return <div className="loading">No posts to show</div>;
-  }
 
   return (
     <main className="feed-container">

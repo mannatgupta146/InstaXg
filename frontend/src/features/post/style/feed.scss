@@ -18,18 +18,20 @@
   font-size: 16px;
 }
 
+/* POST CARD */
+
 .post-card {
   background: white;
   border: 1px solid #dbdbdb;
-  border-radius: 10px;
+  border-radius: 12px;
   margin-bottom: 28px;
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .post-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
 /* HEADER */
@@ -55,65 +57,7 @@
   color: #222;
 }
 
-.unfollow-btn {
-  border: none;
-  background: #f0f0f0;
-  padding: 6px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  transition: all 0.2s;
-  color: #222;
-}
-
-.unfollow-btn:hover {
-  background: #e8e8e8;
-  color: #0095f6;
-}
-
-/* ACTION BUTTONS */
-
-.action-btn {
-  border: 1px solid #dbdbdb;
-  background: white;
-  padding: 7px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  transition: all 0.2s;
-  color: #222;
-}
-
-.action-btn.follow {
-  background: #0095f6;
-  border-color: #0095f6;
-  color: white;
-}
-
-.action-btn.follow:hover {
-  background: #007cd1;
-  border-color: #007cd1;
-}
-
-.action-btn.following {
-  background: #f0f0f0;
-  border-color: #dbdbdb;
-  color: #222;
-}
-
-.action-btn.following:hover {
-  background: #e8e8e8;
-  border-color: #999;
-}
-
-.action-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* POST IMAGE WRAPPER */
+/* AVATAR RING */
 
 .img-wrapper {
   width: 46px;
@@ -130,10 +74,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
-/* white gap circle */
 .inner-circle {
   width: 40px;
   height: 40px;
@@ -145,30 +87,29 @@
   overflow: hidden;
 }
 
-/* image */
 .inner-circle img {
   width: 36px;
   height: 36px;
   border-radius: 50%;
   object-fit: cover;
-  display: block;
 }
 
-/* POST IMAGE */
+/* ✅ UNIFORM IMAGE SIZE */
 
 .post-image {
   width: 100%;
-  max-height: 600px;
+  aspect-ratio: 1 / 1;   /* keep uniform height */
+  background: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  background: #f0f0f0;
 }
 
 .post-image img {
   width: 100%;
-  height: auto;
-  display: block;
-  max-height: 600px;
-  object-fit: contain;
+  height: 100%;
+  object-fit: contain;   /* ✅ shows full image */
 }
 
 /* ACTIONS */
@@ -177,7 +118,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 16px;
+  padding: 12px 16px;
   font-size: 20px;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -190,9 +131,8 @@
 .left-icons i,
 .right-icon i {
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
   color: #262626;
-  user-select: none;
 }
 
 .left-icons i:hover,
@@ -201,17 +141,18 @@
   transform: scale(1.1);
 }
 
-.right-icon i {
-  transition: all 0.2s;
-}
-
 /* CAPTION */
 
 .post-caption {
-  padding: 14px 16px;
+  padding: 12px 16px 16px;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.5;
   color: #262626;
+
+  display: -webkit-box;
+   line-clamp: 2;   /* 🔥 keeps cards same height */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .post-caption strong {
