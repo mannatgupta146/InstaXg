@@ -30,29 +30,26 @@ const Login = () => {
   }
 
   return (
-    <main>
+  <div className="auth-page">
+    <div className="auth-container">
       <form onSubmit={handleSubmit}>
         <h1>Login User</h1>
 
         <input
-          onChange={(e) => {
-            setUsername(e.target.value)
-          }}
+          onChange={(e) => setUsername(e.target.value)}
           type="text"
           placeholder="Enter username"
           value={username}
         />
 
         <input
-          onChange={(e) => {
-            setPassword(e.target.value)
-          }}
+          onChange={(e) => setPassword(e.target.value)}
           type="password"
           placeholder="Enter password"
           value={password}
         />
 
-        <button>Login</button>
+        <button className="btn">Login</button>
 
         <p>
           Don't have an account?{" "}
@@ -61,8 +58,9 @@ const Login = () => {
           </Link>
         </p>
       </form>
-    </main>
-  )
+    </div>
+  </div>
+)
 }
 
 export default Login

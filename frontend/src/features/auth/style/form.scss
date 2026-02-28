@@ -1,109 +1,122 @@
-/* base font size for rem scaling */
-html {
-  font-size: 16px;
+/* 1. Global Reset Fixes */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%; 
 }
 
-/* full page center */
-main {
+.auth-page {
   min-height: 100vh;
+  min-height: 100dvh; 
+  width: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  font-family: Arial, Helvetica, sans-serif;
+  justify-content: center;
+  
+  /* Background: Subtle soft blue-grey */
+  background: #f0f4f8; 
+  padding: 2rem 1rem;
+  box-sizing: border-box;
 }
 
-/* form card */
-form {
-  background: #ffffff;
-  padding: 2.5rem 2.2rem;
-  border-radius: 0.9rem;
-  width: 20rem;
+.auth-container {
+  width: 100%;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
-  box-shadow: 0 0.6rem 1.8rem rgba(0, 0, 0, 0.15);
-  animation: fadeIn 0.4s ease;
 }
 
-/* heading */
-h1 {
+form {
+  position: relative; 
+  background: #ffffff; /* Solid white for a crisp look */
+  padding: 2.5rem;
+  border-radius: 1.25rem;
+  
+  /* Softer, more modern shadow */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+              0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-height: calc(100vh - 4rem); 
+  overflow-y: auto; 
+}
+
+/* Heading: Darker Slate */
+form h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
   text-align: center;
-  font-size: 1.6rem;
-  color: #333;
-  margin-bottom: 0.5rem;
-  letter-spacing: 0.05rem;
+  color: #1a202c; /* Deep slate */
+  font-weight: 800;
 }
 
-/* inputs */
+/* Inputs: Better contrast and focus states */
 input {
-  padding: 0.75rem 0.9rem;
-  border-radius: 0.5rem;
-  border: 1px solid #ddd;
-  font-size: 0.95rem;
-  transition: 0.25s ease;
-  outline: none;
-}
-
-input:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 0.15rem rgba(102, 126, 234, 0.15);
-}
-
-/* button */
-button {
-  margin-top: 0.4rem;
-  padding: 0.75rem;
-  border: none;
-  border-radius: 0.5rem;
-  background: #667eea;
-  color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border: 2px solid #e2e8f0; /* Slightly thicker border */
+  border-radius: 0.75rem;
   font-size: 1rem;
-  font-weight: 600;
+  color: #2d3748;
+  background-color: #f8fafc; /* Very light grey input bg */
+  transition: all 0.2s ease-in-out;
+
+  &::placeholder {
+    color: #a0aec0;
+  }
+
+  &:focus {
+    outline: none;
+    background-color: #fff;
+    border-color: #6366f1; /* Indigo focus */
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  }
+}
+
+/* Button: Vibrant Indigo Gradient */
+button.btn {
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 1rem;
   cursor: pointer;
-  transition: 0.25s ease;
+  margin-top: 0.5rem;
+  transition: transform 0.1s active, box-shadow 0.2s;
+
+  &:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
 }
 
-button:hover {
-  background: #5a67d8;
-  transform: translateY(-0.06rem);
-}
-
-button:active {
-  transform: translateY(0) scale(0.92);
-}
-
-/* paragraph below button */
+/* Text and Link */
 p {
   text-align: center;
-  font-size: 0.85rem;
-  color: #555;
+  font-size: 0.95rem;
+  color: #64748b; /* Muted slate */
   margin-top: 0.5rem;
-}
-
-/* register link */
-.toggleAuth {
-  color: #667eea;
-  font-weight: 600;
-  margin-left: 0.25rem;
-  text-decoration: none;
-  transition: 0.2s ease;
-}
-
-.toggleAuth:hover {
-  color: #5a67d8;
-  text-decoration: underline;
-}
-
-
-/* animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(0.7rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .toggleAuth {
+    color: #4f46e5;
+    text-decoration: none;
+    font-weight: 700;
+    margin-left: 0.3rem;
+    
+    &:hover {
+      color: #3730a3;
+      text-decoration: underline;
+    }
   }
 }
