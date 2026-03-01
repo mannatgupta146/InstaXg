@@ -1,14 +1,9 @@
 import React, { useEffect, useState, useContext } from "react"
 import "../style/userProfile.scss"
-import axios from "axios"
+import api from "../../../api"
 import { useParams, useNavigate } from "react-router-dom"
 import { AuthContext } from "../../auth/context/auth.context"
 import { toast } from "react-toastify"
-
-const api = axios.create({
-  baseURL: "http://localhost:3000",
-  withCredentials: true,
-})
 
 const UserProfile = () => {
   const { username } = useParams()
