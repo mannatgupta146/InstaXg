@@ -26,7 +26,7 @@ const SideNavbar = () => {
       {/* LOGO */}
       <div className="logo">
         <i className="fa-brands fa-instagram"></i>
-        <span>InstaXG</span>
+        <span>InstaXg</span>
       </div>
 
       {/* NAV LINKS */}
