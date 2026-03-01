@@ -36,10 +36,10 @@ const registerController = async (req, res) => {
   )
 
   res.cookie("token", token, {
-  httpOnly: true,
-  secure: false,      // true only in production HTTPS
-  sameSite: "lax",
-});
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  })
 
   res.status(201).json({
     message: "user registered successfully",
@@ -55,11 +55,12 @@ const registerController = async (req, res) => {
 
 const loginController = async (req, res) => {
   const { name, username, email, password, bio, profilePic } = req.body
- 
 
-  const user = await userModel.findOne({
-    $or: [{ username: username }, { email: email }],
-  }).select("+password") 
+  const user = await userModel
+    .findOne({
+      $or: [{ username: username }, { email: email }],
+    })
+    .select("+password")
 
   if (!user) {
     return res.status(404).json({
@@ -84,14 +85,11 @@ const loginController = async (req, res) => {
     { expiresIn: "1d" },
   )
 
-res.cookie("token", token, {
-  httpOnly: true,
-  secure: false,      // true only in production HTTPS
-  sameSite: "lax",
-});
-
- console.log("LOGIN BODY:", req.body);
-console.log("USER FOUND:", user);
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  })
 
   res.status(200).json({
     message: "user loggedin successfully",
@@ -106,10 +104,10 @@ console.log("USER FOUND:", user);
 }
 
 const getMeController = async (req, res) => {
-  const user = await userModel.findById(req.user.id);
+  const user = await userModel.findById(req.user.id)
 
   if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    return res.status(404).json({ message: "User not found" })
   }
 
   res.status(200).json({
@@ -121,24 +119,24 @@ const getMeController = async (req, res) => {
       bio: user.bio,
       profilePic: user.profilePic,
     },
-  });
-};
+  })
+}
 
 const logoutController = (req, res) => {
-  res.clearCookie("token", {
+  res.cookie("token", token, {
     httpOnly: true,
-    secure: false,   // true in production HTTPS
-    sameSite: "lax",
-  });
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  })
 
   res.status(200).json({
     message: "Logged out successfully",
-  });
-};
+  })
+}
 
 module.exports = {
   registerController,
   loginController,
   getMeController,
-  logoutController
+  logoutController,
 }
