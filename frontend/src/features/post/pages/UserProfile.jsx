@@ -33,13 +33,11 @@ const UserProfile = () => {
   const [followLoading, setFollowLoading] = useState(false)
 
   useEffect(() => {
-    // If username param exists, load that user's profile
-    if (username) {
-      loadUserProfile(username)
-    } else {
-      // Load current user's profile
-      loadProfile()
-    }
+    if (username && username !== currentUser?.username) {
+  loadUserProfile(username)
+} else {
+  loadProfile()   // loads requests too
+}
   }, [username, currentUser])
 
   const loadSavedPosts = async () => {

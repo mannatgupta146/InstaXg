@@ -1,33 +1,26 @@
-import axios from "axios";
+import api from "../../../api";
 
-const api = axios.create({
-  baseURL: "http://localhost:3000/api/auth",
-  withCredentials: true,
-});
-
-// REGISTER
+// register
 export const register = async (username, email, password) => {
-  const res = await api.post("/register", {
+  const res = await api.post("/api/auth/register", {
     username,
     email,
     password,
   });
-
   return res.data;
 };
 
-// LOGIN
+// login
 export const login = async (username, password) => {
-  const res = await api.post("/login", {
+  const res = await api.post("/api/auth/login", {
     username,
     password,
   });
-
   return res.data;
 };
 
-// GET LOGGED USER
+// get current user
 export const getMe = async () => {
-  const res = await api.get("/get-me");
+  const res = await api.get("/api/auth/get-me");
   return res.data;
 };

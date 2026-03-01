@@ -1,4 +1,4 @@
-import api from '../../../api'
+import api from "../../../api";
 
 // get all users with follow status
 export const getUsers = async () => {
@@ -6,12 +6,10 @@ export const getUsers = async () => {
   return res.data;
 };
 
-// send follow request
 export const followUser = async (username) => {
   return api.post(`/api/users/follow/${username}`);
 };
 
-// unfollow OR cancel request
 export const unfollowUser = async (username) => {
   return api.post(`/api/users/unfollow/${username}`);
 };

@@ -5,11 +5,13 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// SAFE interceptor
 api.interceptors.response.use(
   res => res,
   err => {
     if (err.response?.status === 401) {
-      window.location.href = "/login"; // redirect once
+      console.warn("Unauthorized request");
+      // ❌ DO NOT redirect here
     }
     return Promise.reject(err);
   }
