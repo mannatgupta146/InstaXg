@@ -14,6 +14,8 @@ export const useAuth = () => {
       const response = await register(username, email, password)
       
       setUser(response.user)
+      context.setIsAuthenticated(true);
+      
       return response
 
     } catch (error) {
@@ -25,21 +27,21 @@ export const useAuth = () => {
   }
 
   const handleLogin = async (username, password) => {
-    setLoading(true)
+  setLoading(true);
 
-    try {
-      const response = await login(username, password)
+  try {
+    const response = await login(username, password);
 
-      setUser(response.user)
-      return response
+    setUser(response.user);
+    context.setIsAuthenticated(true);   // ⭐ ADD THIS
 
-    } catch (error) {
-      console.log(error)
-
-    } finally {
-      setLoading(false)
-    }
+    return response;
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setLoading(false);
   }
+};
 
   return {
     user, loading, handleLogin, handleRegister

@@ -1,32 +1,52 @@
-import React from "react"
-import { useState } from "react"
-import "../style/form.scss"
-import { Link, useNavigate } from "react-router-dom"
-import { useAuth } from "../hooks/useAuth"
+import React, { useState } from "react";
+import "../style/form.scss";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { toast } from "react-toastify";
 
 const Register = () => {
-  const [username, setUsername] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const { loading, handleRegister } = useAuth()
+  const { loading, handleRegister } = useAuth();
+  const navigate = useNavigate();
 
-  const navigate = useNavigate()
-
-  if (loading) {
-    return <h1>Loading...</h1>
-  }
+  if (loading) return <h1>Loading...</h1>;
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const res = await handleRegister(username, email, password)
+    if (!username || !email || !password) {
+      toast.warning("Please fill all fields");
+      return;
+    }
 
-    console.log(res)
-    console.log(res.user)
+    const toastId = toast.loading("Creating account...");
 
-    navigate("/")
-  }
+    try {
+      const res = await handleRegister(username, email, password);
+
+      toast.update(toastId, {
+        render: "Account created successfully 🎉",
+        type: "success",
+        isLoading: false,
+        autoClose: 2000,
+      });
+
+      navigate("/", { replace: true });
+
+    } catch (err) {
+      toast.update(toastId, {
+        render:
+          err.response?.data?.message ||
+          "Registration failed ❌",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
+    }
+  };
 
   return (
     <div className="auth-page">
@@ -35,27 +55,21 @@ const Register = () => {
           <h1>Register User</h1>
 
           <input
-            onChange={(e) => {
-              setUsername(e.target.value)
-            }}
+            onChange={(e) => setUsername(e.target.value)}
             type="text"
             placeholder="Enter username"
             value={username}
           />
 
           <input
-            onChange={(e) => {
-              setEmail(e.target.value)
-            }}
+            onChange={(e) => setEmail(e.target.value)}
             type="text"
             placeholder="Enter email"
             value={email}
           />
 
           <input
-            onChange={(e) => {
-              setPassword(e.target.value)
-            }}
+            onChange={(e) => setPassword(e.target.value)}
             type="password"
             placeholder="Enter password"
             value={password}
@@ -72,7 +86,7 @@ const Register = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;

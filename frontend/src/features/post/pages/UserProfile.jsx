@@ -3,6 +3,7 @@ import "../style/userProfile.scss"
 import axios from "axios"
 import { useParams, useNavigate } from "react-router-dom"
 import { AuthContext } from "../../auth/context/auth.context"
+import { toast } from "react-toastify"
 
 const api = axios.create({
   baseURL: "http://localhost:3000",
@@ -44,188 +45,279 @@ const UserProfile = () => {
       const profileRes = await api.get("/api/users/profile")
       const userData = profileRes.data.user
 
-      console.log("👤 User:", userData)
-
       const postsRes = await api.get(`/api/posts/user/${userData.username}`)
-      console.log("📸 Posts Response:", postsRes.data)
-
       const followersRes = await api.get("/api/users/followers")
       const followingRes = await api.get("/api/users/following")
       const requestsRes = await api.get("/api/users/follow/requests")
-      setRequests(requestsRes.data.requests || [])
 
       setUser(userData)
       setPosts(postsRes.data.posts || [])
       setFollowers(followersRes.data.followers || [])
       setFollowing(followingRes.data.following || [])
-
-      console.log(
-        "✅ Profile loaded - Posts count:",
-        postsRes.data.posts?.length || 0,
-      )
+      setRequests(requestsRes.data.requests || [])
     } catch (err) {
-      console.error("❌ PROFILE LOAD ERROR:", err.message)
-      console.error("Status:", err.response?.status)
-      console.error("Data:", err.response?.data)
+      toast.error("Failed to load profile")
     }
   }
 
   const loadUserProfile = async (userToLoad) => {
     try {
-      const userRes = await api.get(`/api/users/profile`)
-      const allUsers = userRes.data.user // This is the current user
+      // run requests in parallel (faster ⚡)
+      const [postsRes, relationRes] = await Promise.all([
+        api.get(`/api/posts/user/${userToLoad}`),
+        api.get("/api/users/all"),
+      ])
 
-      // If we're viewing another user, fetch their posts
-      const postsRes = await api.get(`/api/posts/user/${userToLoad}`)
+      const postsData = postsRes.data.posts || []
 
       setUser({
         username: userToLoad,
-        profilePic: postsRes.data.posts[0]?.profilePic || null,
+        profilePic: postsData[0]?.profilePic || null,
       })
-      setPosts(postsRes.data.posts || [])
 
-      // Check if current user is following this user
-      const relationRes = await api.get("/api/users/all")
+      setPosts(postsData)
 
+      // find relation safely
       const relation = relationRes.data.find((u) => u.username === userToLoad)
 
-      setFollowStatus(relation?.followStatus || null)
+      setFollowStatus(relation?.followStatus ?? null)
     } catch (err) {
-      console.error("❌ Error loading user profile:", err)
+      console.error("Error loading user profile:", err)
+
+      toast.error(err.response?.data?.message || "Failed to load user profile")
     }
   }
 
   const handleDeletePost = async (id) => {
-    if (!window.confirm("Delete this post?")) return
+    const confirmDelete = window.confirm("Delete this post?")
+    if (!confirmDelete) return
+
     try {
+      // remove instantly from UI (fast UX)
+      setPosts((prev) => prev.filter((post) => post._id !== id))
+
       await api.delete(`/api/posts/${id}`)
-      setPosts(posts.filter((p) => p._id !== id))
-      console.log("✅ Post deleted")
+
+      toast.success("Post deleted successfully 🗑️")
     } catch (err) {
-      console.error("Error deleting post:", err)
+      console.error("Delete error:", err)
+
+      toast.error(err.response?.data?.message || "Failed to delete post")
+
+      // reload posts if delete failed
+      loadProfile()
     }
   }
 
   const handleEditProfile = async () => {
     try {
-      if (editBio) {
-        await api.patch("/api/users/profile", { bio: editBio })
-        setUser({ ...user, bio: editBio })
+      const formData = new FormData()
+
+      // only append if changed
+      if (editBio !== user.bio) {
+        formData.append("bio", editBio)
       }
 
       if (profilePicFile) {
-        const formData = new FormData()
         formData.append("profilePic", profilePicFile)
-        const res = await api.patch("/api/users/profile", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        })
-        setUser(res.data.user)
       }
 
+      // if nothing changed → stop
+      if (![...formData.keys()].length) {
+        toast.info("No changes made")
+        return
+      }
+
+      const res = await api.patch("/api/users/profile", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+
+      setUser(res.data.user)
       setIsEditing(false)
       setProfilePicFile(null)
-      console.log("✅ Profile updated")
+
+      toast.success("Profile updated successfully ✨")
     } catch (err) {
       console.error("Edit error:", err)
-      alert(
-        "Error updating profile: " +
-          (err.response?.data?.message || err.message),
-      )
+
+      toast.error(err.response?.data?.message || "Profile update failed")
     }
   }
 
   const handleProfilePicChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      // If user is editing via modal, keep it in state for preview.
-      // If user clicked the small change button on their profile, upload immediately.
-      if (isOwnProfile && !isEditing) {
-        uploadProfilePic(file)
-      } else {
-        setProfilePicFile(file)
-      }
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // ✅ allow only images
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file")
+      return
+    }
+
+    // ✅ limit size (2MB)
+    const maxSize = 2 * 1024 * 1024
+    if (file.size > maxSize) {
+      toast.error("Image must be under 2MB")
+      return
+    }
+
+    // preview instantly
+    setProfilePicFile(file)
+
+    // upload immediately if not editing modal
+    if (isOwnProfile && !isEditing) {
+      uploadProfilePic(file)
+      toast.info("Uploading profile picture...")
     }
   }
 
   const uploadProfilePic = async (file) => {
+    const toastId = toast.loading("Uploading profile picture...")
+
     try {
       const formData = new FormData()
       formData.append("profilePic", file)
-      // show temporary preview immediately
-      setProfilePicFile(file)
+
       const res = await api.patch("/api/users/profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
+
+        // ✅ upload progress (optional but great UX)
+        onUploadProgress: (progressEvent) => {
+          const percent = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          )
+          toast.update(toastId, {
+            render: `Uploading... ${percent}%`,
+          })
+        },
       })
+
       setUser(res.data.user)
-      setProfilePicFile(null)
-      console.log("✅ Profile picture updated")
+
+      toast.update(toastId, {
+        render: "Profile picture updated 🎉",
+        type: "success",
+        isLoading: false,
+        autoClose: 2000,
+      })
     } catch (err) {
       console.error("Upload error:", err)
-      alert(err.response?.data?.message || "Error uploading profile picture")
-      setProfilePicFile(null)
+
+      toast.update(toastId, {
+        render:
+          err.response?.data?.message || "Failed to upload profile picture",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      })
     }
   }
 
   const handleFollow = async () => {
+    if (followLoading) return // 🛑 prevent double clicks
+
     setFollowLoading(true)
 
     try {
-      // unfollow OR cancel request
-      if (followStatus === "accepted" || followStatus === "pending") {
+      // ✅ Already following → unfollow
+      if (followStatus === "accepted") {
         await api.post(`/api/users/unfollow/${user.username}`)
         setFollowStatus(null)
-      } else {
-        await api.post(`/api/users/follow/${user.username}`)
-        setFollowStatus("pending") // until accepted
+        toast.info("Unfollowed")
+        return
       }
+
+      // ✅ Request pending → cancel request
+      if (followStatus === "pending") {
+        await api.post(`/api/users/unfollow/${user.username}`)
+        setFollowStatus(null)
+        toast.info("Follow request cancelled")
+        return
+      }
+
+      // ✅ Send follow request
+      await api.post(`/api/users/follow/${user.username}`)
+      setFollowStatus("pending")
+      toast.success("Follow request sent")
     } catch (err) {
-      alert(err.response?.data?.message || "Error updating follow")
+      console.error(err)
+
+      toast.error(
+        err.response?.data?.message || "Something went wrong. Try again.",
+      )
     } finally {
       setFollowLoading(false)
     }
   }
 
   const handleUnfollowUser = async (usernameToUnfollow) => {
-    if (!window.confirm(`Unfollow ${usernameToUnfollow}?`)) return
+    const confirm = window.confirm(`Unfollow ${usernameToUnfollow}?`)
+    if (!confirm) return
+
     try {
+      // 🔥 API call
       await api.post(`/api/users/unfollow/${usernameToUnfollow}`)
+
+      // 🔥 instant UI update
       setFollowing((prev) =>
         prev.filter((f) => f.followee !== usernameToUnfollow),
       )
-      // If viewing own profile and unfollowed someone, also adjust UI feedback
-      console.log("✅ Unfollowed:", usernameToUnfollow)
+
+      toast.info(`Unfollowed ${usernameToUnfollow}`)
     } catch (err) {
-      console.error("Unfollow error:", err)
-      alert(err.response?.data?.message || "Error unfollowing user")
+      console.error(err)
+
+      toast.error(
+        err.response?.data?.message || "Failed to unfollow. Try again.",
+      )
     }
   }
 
   const handleRemoveFollower = async (followerUsername) => {
-    if (!window.confirm(`Remove ${followerUsername}?`)) return
+    const confirm = window.confirm(`Remove ${followerUsername} from followers?`)
+    if (!confirm) return
 
     try {
+      // 🔥 remove follower from backend
       await api.post(`/api/users/remove-follower/${followerUsername}`)
 
+      // 🔥 update UI instantly
       setFollowers((prev) =>
         prev.filter((f) => f.follower !== followerUsername),
       )
+
+      toast.info(`${followerUsername} removed`)
     } catch (err) {
       console.error(err)
+
+      toast.error(err.response?.data?.message || "Failed to remove follower")
     }
   }
 
   const handleRequestAction = async (requestId, status) => {
     try {
+      // find username before removing request
+      const request = requests.find((r) => r._id === requestId)
+      const requester = request?.follower
+
+      // update on server
       await api.patch(`/api/users/follow/request/${requestId}`, { status })
 
       // remove request instantly
       setRequests((prev) => prev.filter((r) => r._id !== requestId))
 
-      // 🔥 refresh followers & counts instantly
-      const followersRes = await api.get("/api/users/followers")
-      setFollowers(followersRes.data.followers || [])
+      if (status === "accepted") {
+        // add follower instantly
+        setFollowers((prev) => [...prev, { follower: requester }])
+
+        toast.success(`${requester} is now following you`)
+      } else {
+        toast.info(`Request from ${requester} rejected`)
+      }
     } catch (err) {
       console.error(err)
+
+      toast.error(err.response?.data?.message || "Failed to update request")
     }
   }
 

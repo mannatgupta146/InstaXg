@@ -1,74 +1,73 @@
-import React, { useEffect, useState } from "react"
-import "../style/search.scss"
-import { getUsers, followUser, unfollowUser } from "../services/user.api"
+import React, { useEffect, useState } from "react";
+import "../style/search.scss";
+import { getUsers, followUser, unfollowUser } from "../services/user.api";
+import { toast } from "react-toastify";
 
 const Search = () => {
-  const [users, setUsers] = useState([])
-  const [filtered, setFiltered] = useState([])
-  const [query, setQuery] = useState("")
+  const [users, setUsers] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
-    loadUsers()
-  }, [])
+    loadUsers();
+  }, []);
 
   const loadUsers = async () => {
-    const data = await getUsers()
-    setUsers(data)
-    setFiltered(data)
-  }
+    const data = await getUsers();
+    setUsers(data);
+    setFiltered(data);
+  };
 
   const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase()
-    setQuery(value)
+    const value = e.target.value.toLowerCase();
+    setQuery(value);
 
     const filteredUsers = users.filter((u) =>
-      u.username.toLowerCase().includes(value),
-    )
+      u.username.toLowerCase().includes(value)
+    );
 
-    setFiltered(filteredUsers)
-  }
+    setFiltered(filteredUsers);
+  };
 
   const updateStatus = (username, newStatus) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.username === username ? { ...u, followStatus: newStatus } : u,
-      ),
-    )
+    setUsers(prev =>
+      prev.map(u =>
+        u.username === username ? { ...u, followStatus: newStatus } : u
+      )
+    );
 
-    setFiltered((prev) =>
-      prev.map((u) =>
-        u.username === username ? { ...u, followStatus: newStatus } : u,
-      ),
-    )
-  }
+    setFiltered(prev =>
+      prev.map(u =>
+        u.username === username ? { ...u, followStatus: newStatus } : u
+      )
+    );
+  };
 
   const toggleFollow = async (username, status) => {
     try {
-      // 🔥 if following → unfollow
       if (status === "accepted") {
-        await unfollowUser(username)
-
-        // instant UI update
-        updateStatus(username, null)
-        return
+        await unfollowUser(username);
+        updateStatus(username, null);
+        toast.success("Unfollowed");
+        return;
       }
 
-      // 🔥 if request pending → cancel request
       if (status === "pending") {
-        await unfollowUser(username)
-
-        updateStatus(username, null)
-        return
+        await unfollowUser(username);
+        updateStatus(username, null);
+        toast.info("Request cancelled");
+        return;
       }
 
-      // 🔥 send follow request
-      await followUser(username)
+      await followUser(username);
+      updateStatus(username, "pending");
+      toast.success("Follow request sent");
 
-      updateStatus(username, "pending")
     } catch (err) {
-      console.error("Follow error:", err)
+      console.error("Follow error:", err);
+      toast.error(err.response?.data?.message || "Action failed");
     }
-  }
+  };
 
   return (
     <div className="search-page">
@@ -92,19 +91,21 @@ const Search = () => {
               className={`follow-btn ${
                 user.followStatus === "accepted" ? "following" : ""
               }`}
-              onClick={() => toggleFollow(user.username, user.followStatus)}
+              onClick={() =>
+                toggleFollow(user.username, user.followStatus)
+              }
             >
               {user.followStatus === "accepted"
                 ? "Following"
                 : user.followStatus === "pending"
-                  ? "Requested"
-                  : "Follow"}
+                ? "Requested"
+                : "Follow"}
             </button>
           </div>
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Search
+export default Search;
