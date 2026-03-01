@@ -21,4 +21,6 @@ app.use('/api/auth', authRouter)
 app.use('/api/posts', postRouter)
 app.use('/api/users', userRouter)
 
+app.set("trust proxy", 1);
+
 module.exports = app
