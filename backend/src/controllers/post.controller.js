@@ -88,93 +88,144 @@ const getPostDetailsController = async (req, res) => {
 }
 
 const postLikeController = async (req, res) => {
-  const username = req.user.username
-  const postId = req.params.postId
+  try {
+    const username = req.user.username;
+    const postId = req.params.postId;
 
-  const post = await postModel.findById(postId)
-
-  if (!post) {
-    return res.status(404).json({
-      message: "No post exists",
-    })
-  }
-
-  // allow owner
-  if (post.username !== username) {
-    const relation = await followModel.findOne({
-      follower: username,
-      followee: post.username,
-      status: "accepted",
-    })
-
-    if (!relation) {
-      return res.status(403).json({
-        message: "Follow user to like posts",
-      })
+    const post = await postModel.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
     }
+
+    // 🔐 permission check (owner allowed)
+    if (post.username !== username) {
+      const relation = await followModel.findOne({
+        follower: username,
+        followee: post.username,
+        status: "accepted",
+      });
+
+      if (!relation) {
+        return res.status(403).json({
+          message: "Follow user to like posts",
+        });
+      }
+    }
+
+    // 🔍 check existing like
+    const existingLike = await likeModel.findOne({
+      post: postId,
+      user: username,
+    });
+
+    let liked;
+
+    // ❤️ UNLIKE
+    if (existingLike) {
+      await likeModel.deleteOne({
+        post: postId,
+        user: username,
+      });
+      liked = false;
+    } else {
+      // ❤️ LIKE
+      await likeModel.create({
+        post: postId,
+        user: username,
+      });
+      liked = true;
+    }
+
+    // ⭐ ALWAYS recalc count after operation
+    const likesCount = await likeModel.countDocuments({
+      post: postId,
+    });
+
+    res.status(200).json({
+      liked,
+      likesCount,
+    });
+
+  } catch (error) {
+    console.error("Like error:", error);
+
+    // duplicate safe fallback
+    if (error.code === 11000) {
+      return res.status(200).json({ liked: true });
+    }
+
+    res.status(500).json({ message: "Server error" });
   }
-
-  const like = await likeModel.create({
-    user: username,
-    post: postId,
-  })
-
-  res.status(200).json({
-    message: "post liked successfully",
-    like,
-  })
-}
+};
 
 const getFeedController = async (req, res) => {
   const username = req.user.username
   const userId = req.user.id
 
-  // find accepted following usernames
+  // ✅ users you follow
   const following = await followModel
     .find({ follower: username, status: "accepted" })
     .select("followee")
 
-  const followingUsernames = following.map((f) => f.followee)
+  const followingUsernames = following.map(f => f.followee)
 
-  // resolve followee user ids (handles posts that were created without username field)
+  // ✅ get users data
   const followeeUsers = await userModel
     .find({ username: { $in: followingUsernames } })
     .select("_id username profilePic")
 
-  const userIds = followeeUsers.map((u) => u._id.toString())
+  const userIds = followeeUsers.map(u => u._id.toString())
   userIds.push(userId)
 
-  // get posts by user ObjectId (safer for existing data)
+  // ✅ fetch posts
   const posts = await postModel
     .find({ user: { $in: userIds } })
     .sort({ createdAt: -1 })
 
-  // build a quick map for profile pics
+  // ✅ fetch likes
+  const likes = await likeModel.find({
+    post: { $in: posts.map(p => p._id) }
+  })
+
+  // ✅ build profile pic map
   const profilePicMap = {}
-  followeeUsers.forEach((u) => {
+  followeeUsers.forEach(u => {
     profilePicMap[u.username] = u.profilePic || null
-    profilePicMap[u._id.toString()] = u.profilePic || null
   })
 
-  const loggedInUser = await userModel
-    .findById(userId)
-    .select("username profilePic")
-  if (loggedInUser) {
-    profilePicMap[loggedInUser.username] = loggedInUser.profilePic || null
-    profilePicMap[loggedInUser._id.toString()] = loggedInUser.profilePic || null
-  }
+  const me = await userModel.findById(userId).select("username profilePic")
+  profilePicMap[me.username] = me.profilePic || null
 
-  const postsWithUserData = posts.map((post) => {
-    const pObj = post.toObject()
-    // prefer username lookup, fallback to user id
-    let pic = null
-    if (pObj.username && profilePicMap[pObj.username] !== undefined)
-      pic = profilePicMap[pObj.username]
-    if (!pic && pObj.user) pic = profilePicMap[pObj.user.toString()] || null
-    return { ...pObj, profilePic: pic }
+  // ✅ check follow relation for feed users
+  const relations = await followModel.find({
+    follower: username,
+    followee: { $in: posts.map(p => p.username) },
+    status: "accepted",
   })
 
-  res.status(200).json({ posts: postsWithUserData })
+  const postsWithData = posts.map(post => {
+    const postLikes = likes.filter(
+      l => l.post.toString() === post._id.toString()
+    )
+
+    const likedByCurrentUser = postLikes.some(
+      l => l.user === username
+    )
+
+    const isFollowing = relations.some(
+      r => r.followee === post.username
+    )
+
+    return {
+      ...post.toObject(),
+      profilePic: profilePicMap[post.username] || null,
+      likesCount: postLikes.length,
+      likedByCurrentUser,
+      isFollowing,
+    }
+  })
+
+  res.status(200).json({ posts: postsWithData })
 }
 
 const getUserPostsController = async (req, res) => {

@@ -48,10 +48,27 @@
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s ease;
+}
+
+/* FOLLOW */
+.follow-btn {
   background: #0095f6;
   color: white;
 }
 
+.follow-btn:hover {
+  background: #007cd1;
+}
+
+/* REQUESTED */
+.follow-btn.requested {
+  background: #22c55e;   /* modern green */
+  color: white;
+}
+
+/* FOLLOWING */
 .follow-btn.following {
   background: #efefef;
   color: #222;

@@ -88,12 +88,11 @@ const Search = () => {
             </div>
 
             <button
-              className={`follow-btn ${
-                user.followStatus === "accepted" ? "following" : ""
-              }`}
-              onClick={() =>
-                toggleFollow(user.username, user.followStatus)
-              }
+              className={`follow-btn 
+                ${user.followStatus === "accepted" ? "following" : ""}
+                ${user.followStatus === "pending" ? "requested" : ""}
+              `}
+              onClick={() => toggleFollow(user.username, user.followStatus)}
             >
               {user.followStatus === "accepted"
                 ? "Following"

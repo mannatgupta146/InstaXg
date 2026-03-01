@@ -259,56 +259,56 @@ const updateProfileController = async (req, res) => {
 }
 
 const getAllUsersController = async (req, res) => {
-  const loggedUser = req.user.username;
+  const loggedUser = req.user.username
 
   const users = await userModel
     .find({ username: { $ne: loggedUser } })
-    .select("username profilePic");
+    .select("username profilePic")
 
   const relations = await followModel.find({
     follower: loggedUser,
-  });
+  })
 
-  const relationMap = new Map();
+  const relationMap = new Map()
 
-  relations.forEach(rel => {
+  relations.forEach((rel) => {
     // ❌ do NOT return rejected
-if (rel.status === "accepted" || rel.status === "pending") {
-  relationMap.set(rel.followee, rel.status);
-}
-  });
+    if (rel.status === "accepted" || rel.status === "pending") {
+      relationMap.set(rel.followee, rel.status)
+    }
+  })
 
-  const result = users.map(user => ({
+  const result = users.map((user) => ({
     username: user.username,
     profilePic: user.profilePic,
     followStatus: relationMap.get(user.username) || null,
-  }));
+  }))
 
-  res.status(200).json(result);
-};
+  res.status(200).json(result)
+}
 
 const removeFollowerController = async (req, res) => {
-  const loggedUser = req.user.username;
-  const followerUsername = req.params.username;
+  const loggedUser = req.user.username
+  const followerUsername = req.params.username
 
   const existing = await followModel.findOne({
     follower: followerUsername,
     followee: loggedUser,
     status: "accepted",
-  });
+  })
 
   if (!existing) {
     return res.status(404).json({
       message: "Follower not found",
-    });
+    })
   }
 
-  await followModel.findByIdAndDelete(existing._id);
+  await followModel.findByIdAndDelete(existing._id)
 
   res.status(200).json({
     message: `${followerUsername} removed from followers`,
-  });
-};
+  })
+}
 
 module.exports = {
   followUserController,
@@ -320,5 +320,5 @@ module.exports = {
   getProfileController,
   updateProfileController,
   getAllUsersController,
-  removeFollowerController
+  removeFollowerController,
 }
