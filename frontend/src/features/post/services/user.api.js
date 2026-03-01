@@ -1,4 +1,4 @@
-import { api } from "./post.api";
+import api from '../../../api'
 
 // get all users with follow status
 export const getUsers = async () => {

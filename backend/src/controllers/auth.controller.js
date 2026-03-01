@@ -123,8 +123,22 @@ const getMeController = async (req, res) => {
     },
   });
 };
+
+const logoutController = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: false,   // true in production HTTPS
+    sameSite: "lax",
+  });
+
+  res.status(200).json({
+    message: "Logged out successfully",
+  });
+};
+
 module.exports = {
   registerController,
   loginController,
   getMeController,
+  logoutController
 }

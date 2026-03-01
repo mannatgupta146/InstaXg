@@ -568,6 +568,7 @@ const UserProfile = () => {
 
       {/* POSTS GRID */}
       <div className="posts-grid">
+        {/* USER POSTS */}
         {!showSaved &&
           posts.map((post) => (
             <div key={post._id} className="post-item">
@@ -584,7 +585,9 @@ const UserProfile = () => {
             </div>
           ))}
 
+        {/* SAVED POSTS */}
         {showSaved &&
+          savedPosts.length > 0 &&
           savedPosts.map((post) => (
             <div key={post._id} className="post-item">
               <img src={post.imgUrl} alt="" />
@@ -595,6 +598,15 @@ const UserProfile = () => {
             </div>
           ))}
       </div>
+
+      {/* ⭐ EMPTY STATE */}
+      {showSaved && savedPosts.length === 0 && (
+        <div className="empty-state">
+          <i className="fa-regular fa-bookmark"></i>
+          <h3>No Saved Posts</h3>
+          <p>Save posts to view them here later.</p>
+        </div>
+      )}
     </div>
   )
 }
