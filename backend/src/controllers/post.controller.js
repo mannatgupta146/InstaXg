@@ -3,6 +3,7 @@ const postModel = require("../models/post.model")
 const userModel = require("../models/user.model")
 const likeModel = require("../models/like.model")
 const ImageKit = require("@imagekit/nodejs")
+const savedModel = require("../models/saved.model")
 
 const imagekit = new ImageKit({
   privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
@@ -162,14 +163,14 @@ const getFeedController = async (req, res) => {
   const username = req.user.username
   const userId = req.user.id
 
-  // ✅ users you follow
+  // users you follow
   const following = await followModel
     .find({ follower: username, status: "accepted" })
     .select("followee")
 
   const followingUsernames = following.map(f => f.followee)
 
-  // ✅ get users data
+  // get followee user data
   const followeeUsers = await userModel
     .find({ username: { $in: followingUsernames } })
     .select("_id username profilePic")
@@ -177,17 +178,23 @@ const getFeedController = async (req, res) => {
   const userIds = followeeUsers.map(u => u._id.toString())
   userIds.push(userId)
 
-  // ✅ fetch posts
+  // fetch posts
   const posts = await postModel
     .find({ user: { $in: userIds } })
     .sort({ createdAt: -1 })
 
-  // ✅ fetch likes
+  // fetch likes
   const likes = await likeModel.find({
     post: { $in: posts.map(p => p._id) }
   })
 
-  // ✅ build profile pic map
+  // ⭐ fetch saved posts
+  const savedPosts = await savedModel.find({
+    user: username,
+    post: { $in: posts.map(p => p._id) }
+  })
+
+  // build profile pic map
   const profilePicMap = {}
   followeeUsers.forEach(u => {
     profilePicMap[u.username] = u.profilePic || null
@@ -196,7 +203,7 @@ const getFeedController = async (req, res) => {
   const me = await userModel.findById(userId).select("username profilePic")
   profilePicMap[me.username] = me.profilePic || null
 
-  // ✅ check follow relation for feed users
+  // check follow relation for feed users
   const relations = await followModel.find({
     follower: username,
     followee: { $in: posts.map(p => p.username) },
@@ -208,20 +215,17 @@ const getFeedController = async (req, res) => {
       l => l.post.toString() === post._id.toString()
     )
 
-    const likedByCurrentUser = postLikes.some(
-      l => l.user === username
-    )
-
-    const isFollowing = relations.some(
-      r => r.followee === post.username
-    )
-
     return {
       ...post.toObject(),
       profilePic: profilePicMap[post.username] || null,
       likesCount: postLikes.length,
-      likedByCurrentUser,
-      isFollowing,
+      likedByCurrentUser: postLikes.some(l => l.user === username),
+      savedByCurrentUser: savedPosts.some(
+        s => s.post.toString() === post._id.toString()
+      ),
+      isFollowing: relations.some(
+        r => r.followee === post.username
+      ),
     }
   })
 
@@ -271,6 +275,57 @@ const deletePostController = async (req, res) => {
   }
 }
 
+const toggleSaveController = async (req, res) => {
+  const username = req.user.username
+  const postId = req.params.postId
+
+  const existing = await savedModel.findOne({
+    post: postId,
+    user: username,
+  })
+
+  if (existing) {
+    await savedModel.deleteOne({ post: postId, user: username })
+    return res.json({ saved: false })
+  }
+
+  await savedModel.create({
+    post: postId,
+    user: username,
+  })
+
+  res.json({ saved: true })
+}
+
+const getSavedPostsController = async (req, res) => {
+  const username = req.user.username
+
+  const saved = await savedModel.find({ user: username })
+
+  const postIds = saved.map(s => s.post)
+
+  const posts = await postModel.find({ _id: { $in: postIds } })
+
+  const likes = await likeModel.find({
+    post: { $in: postIds }
+  })
+
+  const postsWithData = posts.map(post => {
+    const postLikes = likes.filter(
+      l => l.post.toString() === post._id.toString()
+    )
+
+    return {
+      ...post.toObject(),
+      likesCount: postLikes.length,
+      likedByCurrentUser: postLikes.some(l => l.user === username),
+      savedByCurrentUser: true
+    }
+  })
+
+  res.json({ posts: postsWithData })
+}
+
 module.exports = {
   createPostController,
   getPostController,
@@ -279,4 +334,6 @@ module.exports = {
   getFeedController,
   getUserPostsController,
   deletePostController,
+  toggleSaveController,
+  getSavedPostsController
 }

@@ -69,4 +69,7 @@ postRouter.get(
  */
 postRouter.get("/", identifyUser, postContoller.getPostController)
 
+postRouter.post("/save/:postId", identifyUser, postContoller.toggleSaveController)
+postRouter.get("/saved", identifyUser, postContoller.getSavedPostsController)
+
 module.exports = postRouter

@@ -25,6 +25,8 @@ const UserProfile = () => {
   const [editBio, setEditBio] = useState("")
   const [isEditing, setIsEditing] = useState(false)
   const [profilePicFile, setProfilePicFile] = useState(null)
+  const [savedPosts, setSavedPosts] = useState([])
+  const [showSaved, setShowSaved] = useState(false)
 
   const [followStatus, setFollowStatus] = useState(null)
   // null | pending | accepted
@@ -39,6 +41,15 @@ const UserProfile = () => {
       loadProfile()
     }
   }, [username, currentUser])
+
+  const loadSavedPosts = async () => {
+    try {
+      const res = await api.get("/api/posts/saved")
+      setSavedPosts(res.data.posts || [])
+    } catch {
+      toast.error("Failed to load saved posts")
+    }
+  }
 
   const loadProfile = async () => {
     try {
@@ -55,8 +66,22 @@ const UserProfile = () => {
       setFollowers(followersRes.data.followers || [])
       setFollowing(followingRes.data.following || [])
       setRequests(requestsRes.data.requests || [])
+
+      await loadSavedPosts()
     } catch (err) {
       toast.error("Failed to load profile")
+    }
+  }
+
+  const toggleSave = async (postId) => {
+    try {
+      await api.post(`/api/posts/save/${postId}`)
+
+      setSavedPosts((prev) => prev.filter((p) => p._id !== postId))
+
+      toast.info("Removed from saved")
+    } catch {
+      toast.error("Action failed")
     }
   }
 
@@ -523,21 +548,52 @@ const UserProfile = () => {
         </div>
       )}
 
+      <div className="profile-tabs">
+        <button
+          className={!showSaved ? "active" : ""}
+          onClick={() => setShowSaved(false)}
+        >
+          Posts
+        </button>
+
+        {isOwnProfile && (
+          <button
+            className={showSaved ? "active" : ""}
+            onClick={() => setShowSaved(true)}
+          >
+            Saved
+          </button>
+        )}
+      </div>
+
       {/* POSTS GRID */}
       <div className="posts-grid">
-        {posts.map((post) => (
-          <div key={post._id} className="post-item">
-            <img src={post.imgUrl} alt="" />
-            {isOwnProfile && (
-              <button
-                className="delete"
-                onClick={() => handleDeletePost(post._id)}
-              >
-                Delete
+        {!showSaved &&
+          posts.map((post) => (
+            <div key={post._id} className="post-item">
+              <img src={post.imgUrl} alt="" />
+
+              {isOwnProfile && (
+                <button
+                  className="delete"
+                  onClick={() => handleDeletePost(post._id)}
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+          ))}
+
+        {showSaved &&
+          savedPosts.map((post) => (
+            <div key={post._id} className="post-item">
+              <img src={post.imgUrl} alt="" />
+
+              <button className="unsave" onClick={() => toggleSave(post._id)}>
+                Unsave
               </button>
-            )}
-          </div>
-        ))}
+            </div>
+          ))}
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react"
+import React, { useState, useContext } from "react"
 import axios from "axios"
 import { AuthContext } from "../../auth/context/auth.context"
 import { toast } from "react-toastify"
@@ -13,12 +13,16 @@ const Post = ({ post }) => {
   const { user: currentUser } = useContext(AuthContext)
 
   const [imageError, setImageError] = useState(false)
+
   const [isFollowing, setIsFollowing] = useState(post.isFollowing)
   const [followLoading, setFollowLoading] = useState(false)
-  const [likeLoading, setLikeLoading] = useState(false)
 
   const [liked, setLiked] = useState(post.likedByCurrentUser)
   const [likesCount, setLikesCount] = useState(post.likesCount)
+  const [likeLoading, setLikeLoading] = useState(false)
+
+  const [saved, setSaved] = useState(post.savedByCurrentUser)
+  const [showHeart, setShowHeart] = useState(false)
 
   const isOwnPost = currentUser?.username === post?.username
 
@@ -29,7 +33,22 @@ const Post = ({ post }) => {
 
   const defaultProfilePic = currentUser?.profilePic
 
-  // ✅ LIKE / UNLIKE
+  /* ================= SAVE ================= */
+  const handleSave = async () => {
+    const previous = saved
+    setSaved(!previous)
+
+    try {
+      const res = await api.post(`/api/posts/save/${post._id}`)
+      setSaved(res.data.saved)
+      toast.success(res.data.saved ? "Saved 🔖" : "Removed from saved")
+    } catch {
+      setSaved(previous)
+      toast.error("Failed to update")
+    }
+  }
+
+  /* ================= LIKE ================= */
   const handleLike = async () => {
     if (likeLoading) return
     setLikeLoading(true)
@@ -41,15 +60,14 @@ const Post = ({ post }) => {
       setLikesCount(res.data.likesCount)
 
       toast.success(res.data.liked ? "❤️ Liked" : "💔 Unliked")
-    } catch (err) {
-      console.error(err)
+    } catch {
       toast.error("Failed to update like")
     } finally {
       setLikeLoading(false)
     }
   }
 
-  // ✅ FOLLOW / UNFOLLOW
+  /* ================= FOLLOW ================= */
   const handleFollow = async () => {
     if (followLoading) return
     setFollowLoading(true)
@@ -65,11 +83,20 @@ const Post = ({ post }) => {
         toast.success("Follow request sent")
       }
     } catch (err) {
-      console.error(err)
       toast.error(err.response?.data?.message || "Action failed")
     } finally {
       setFollowLoading(false)
     }
+  }
+
+  /* ================= DOUBLE TAP LIKE ================= */
+  const handleDoubleTap = () => {
+    if (showHeart) return
+
+    if (!liked) handleLike()
+
+    setShowHeart(true)
+    setTimeout(() => setShowHeart(false), 700)
   }
 
   return (
@@ -93,20 +120,22 @@ const Post = ({ post }) => {
           <span>{post.username}</span>
         </div>
 
-        {!isOwnPost && !isFollowing &&  (
+        {!isOwnPost && !isFollowing && (
           <button
-            className={`action-btn ${isFollowing ? "following" : "follow"}`}
+            className="action-btn follow"
             onClick={handleFollow}
             disabled={followLoading}
           >
-            {followLoading ? "..." : isFollowing ? "Following" : "Follow"}
+            {followLoading ? "..." : "Follow"}
           </button>
         )}
       </div>
 
-      {/* POST IMAGE */}
-      <div className="post-image">
+      {/* IMAGE */}
+      <div className="post-image" onDoubleClick={handleDoubleTap}>
         <img src={post.imgUrl} alt={post.caption || "post"} />
+
+        {showHeart && <i className="fa-solid fa-heart heart-burst"></i>}
       </div>
 
       {/* ACTIONS */}
@@ -118,7 +147,7 @@ const Post = ({ post }) => {
             style={{
               color: liked ? "#e74c3c" : "inherit",
               cursor: likeLoading ? "wait" : "pointer",
-              transition: "0.2s",
+              transition: "transform .15s ease",
             }}
           ></i>
 
@@ -127,14 +156,19 @@ const Post = ({ post }) => {
         </div>
 
         <div className="right-icon">
-          <i className="fa-regular fa-bookmark"></i>
+          <i
+            className={`fa-${saved ? "solid" : "regular"} fa-bookmark bookmark-icon`}
+            onClick={handleSave}
+          ></i>
         </div>
       </div>
 
-      {/* ❤️ Likes Count */}
-      <div className="likes-count">
-        {likesCount > 0 && <span>{likesCount} likes</span>}
-      </div>
+      {/* LIKES COUNT */}
+      {likesCount > 0 && (
+        <div className="likes-count">
+          {likesCount} like{likesCount > 1 && "s"}
+        </div>
+      )}
 
       {/* CAPTION */}
       <div className="post-caption">
