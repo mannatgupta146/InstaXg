@@ -7,6 +7,15 @@ import { PostProvider } from "./features/post/context/post.context.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+const AppContent = () => {
+  const { loading } = useContext(AuthContext);
+
+  // 🔥 Wait for auth check before rendering router
+  if (loading) {
+    return <div style={{ textAlign: "center", marginTop: "200px" }}>Loading...</div>;
+  }
+}
+
 const App = () => {
   return (
     <AuthProvider>
